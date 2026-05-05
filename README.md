@@ -5,6 +5,7 @@ A small monorepo for Chrome extension experiments and finished utilities.
 ## Apps
 
 - [Gallery Image Downloader](apps/image-gallery-downloader) - a Manifest V3 side-panel extension for finding, filtering, previewing, converting, and downloading images from the active tab in a grid gallery.
+- [Session Keeper](apps/session-keeper) - a Manifest V3 session manager for autosaving, manually naming, restoring, copying, and exporting tab sessions.
 
 ## Local Development
 
@@ -26,4 +27,5 @@ apps/image-gallery-downloader
 ```text
 apps/
   image-gallery-downloader/
+  session-keeper/
 ```
