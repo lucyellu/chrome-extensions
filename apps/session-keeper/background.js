@@ -214,7 +214,10 @@ async function updateBadge() {
   const windows = await getCurrentWindows();
   const tabCount = windows.reduce((total, item) => total + item.tabs.length, 0);
   await chrome.action.setBadgeText({ text: tabCount ? String(tabCount) : "" });
-  await chrome.action.setBadgeBackgroundColor({ color: "#4f8cff" });
+  await chrome.action.setBadgeBackgroundColor({ color: "#5f6875" });
+  if (chrome.action.setBadgeTextColor) {
+    await chrome.action.setBadgeTextColor({ color: "#d8dee8" });
+  }
 }
 
 function formatTimestamp(date) {

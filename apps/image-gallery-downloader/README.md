@@ -10,7 +10,8 @@ A fresh Manifest V3 Chrome extension inspired by Imageye, with the image browser
 - Gallery cards with thumbnail preview, source type, dimensions, display size, file type, and size metadata when available.
 - Filters by URL/text, minimum width, minimum height, file type, and visible-only.
 - Sorts largest-first by default, with a one-click reverse button for smallest-first.
-- Dark side-panel UI with settings collapsed by default.
+- Dark side-panel UI with a minimal default toolbar and settings collapsed by default.
+- Default gallery cards are image-first, with selection controls hidden and a single-image download button shown on hover.
 - Column slider defaults to 4 images per row and can range from a single-column view to 8 columns.
 - Quick JPG, PNG, and Other type chips, with JPG and PNG enabled by default.
 - Custom toolbar icon for easier identification in Chrome.

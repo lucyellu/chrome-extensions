@@ -43,75 +43,14 @@
 
       <main class="content">
         <section class="quickbar" aria-label="Gallery controls">
-          <label class="search-field">
+          <button class="primary-button quick-download" id="downloadAllButton" type="button" title="Download all visible" aria-label="Download all visible">
             <svg viewBox="0 0 24 24" aria-hidden="true">
-              <circle cx="11" cy="11" r="7"></circle>
-              <path d="m20 20-3.8-3.8"></path>
+              <path d="M12 3v11"></path>
+              <path d="m7 10 5 5 5-5"></path>
+              <path d="M5 21h14"></path>
             </svg>
-            <input id="urlFilter" type="search" placeholder="Filter URL, alt, filename">
-          </label>
-
-          <div class="top-actions">
-            <button class="icon-button" id="selectAllButton" type="button" title="Select visible" aria-label="Select visible">
-              <svg viewBox="0 0 24 24" aria-hidden="true">
-                <path d="M4 5.5A1.5 1.5 0 0 1 5.5 4h13A1.5 1.5 0 0 1 20 5.5v13a1.5 1.5 0 0 1-1.5 1.5h-13A1.5 1.5 0 0 1 4 18.5v-13Z"></path>
-                <path d="m7.5 12 3 3 6-7"></path>
-              </svg>
-            </button>
-            <button class="icon-button" id="clearSelectionButton" type="button" title="Clear selection" aria-label="Clear selection">
-              <svg viewBox="0 0 24 24" aria-hidden="true">
-                <path d="M6 6l12 12M18 6 6 18"></path>
-              </svg>
-            </button>
-            <button class="icon-button" id="reverseButton" type="button" title="Show smallest first" aria-label="Show smallest first">
-              <svg viewBox="0 0 24 24" aria-hidden="true">
-                <path d="M7 7h11"></path>
-                <path d="M7 12h8"></path>
-                <path d="M7 17h4"></path>
-                <path d="m4 8 3-3 3 3"></path>
-              </svg>
-            </button>
-            <button class="icon-button strong-action" id="downloadAllButton" type="button" title="Download all visible" aria-label="Download all visible">
-              <svg viewBox="0 0 24 24" aria-hidden="true">
-                <path d="M12 3v11"></path>
-                <path d="m7 10 5 5 5-5"></path>
-                <path d="M5 21h14"></path>
-              </svg>
-            </button>
-          </div>
-
-          <div class="type-shortcuts" role="group" aria-label="Image type filters">
-            <label class="chip-check">
-              <input class="typeShortcut" type="checkbox" value="jpeg" checked>
-              <span>JPG</span>
-            </label>
-            <label class="chip-check">
-              <input class="typeShortcut" type="checkbox" value="png" checked>
-              <span>PNG</span>
-            </label>
-            <label class="chip-check">
-              <input class="typeShortcut" type="checkbox" value="other">
-              <span>Other</span>
-            </label>
-          </div>
-
-          <label class="size-slider">
-            <span>Columns <strong id="columnCount">4</strong></span>
-            <input id="columnsRange" type="range" min="1" max="8" step="1" value="4">
-          </label>
-
-          <div class="download-row">
-            <label>
-              <span>Download as</span>
-              <select id="downloadFormat">
-                <option value="original">Original</option>
-                <option value="jpeg">JPG</option>
-                <option value="png">PNG</option>
-                <option value="webp">WEBP</option>
-              </select>
-            </label>
-            <button class="primary-button" id="downloadButton" type="button">Selected</button>
-          </div>
+            Download all
+          </button>
         </section>
 
         <details class="settings" id="settingsPanel">
@@ -122,6 +61,29 @@
             </svg>
           </summary>
           <section class="controls" aria-label="Filters and settings">
+            <label class="search-field">
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <circle cx="11" cy="11" r="7"></circle>
+                <path d="m20 20-3.8-3.8"></path>
+              </svg>
+              <input id="urlFilter" type="search" placeholder="Filter URL, alt, filename">
+            </label>
+
+            <div class="type-shortcuts" role="group" aria-label="Image type filters">
+              <label class="chip-check">
+                <input class="typeShortcut" type="checkbox" value="jpeg" checked>
+                <span>JPG</span>
+              </label>
+              <label class="chip-check">
+                <input class="typeShortcut" type="checkbox" value="png" checked>
+                <span>PNG</span>
+              </label>
+              <label class="chip-check">
+                <input class="typeShortcut" type="checkbox" value="other">
+                <span>Other</span>
+              </label>
+            </div>
+
             <div class="filter-grid">
               <label>
                 <span>Min width</span>
@@ -146,6 +108,30 @@
                 <input id="visibleOnly" type="checkbox">
                 <span>Visible only</span>
               </label>
+            </div>
+
+            <label class="size-slider">
+              <span>Columns <strong id="columnCount">4</strong></span>
+              <input id="columnsRange" type="range" min="1" max="8" step="1" value="4">
+            </label>
+
+            <div class="settings-actions">
+              <button class="secondary-button" id="reverseButton" type="button">Reverse sort</button>
+              <label class="download-format">
+                <span>Download as</span>
+                <select id="downloadFormat">
+                  <option value="original">Original JPG/PNG</option>
+                  <option value="jpeg">JPG</option>
+                  <option value="png">PNG</option>
+                  <option value="webp">WEBP</option>
+                </select>
+              </label>
+            </div>
+
+            <div class="hidden-selection-controls" hidden>
+              <button id="selectAllButton" type="button">Select visible</button>
+              <button id="clearSelectionButton" type="button">Clear selection</button>
+              <button id="downloadButton" type="button">Selected</button>
             </div>
           </section>
         </details>

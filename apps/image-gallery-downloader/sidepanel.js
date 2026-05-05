@@ -777,7 +777,7 @@ function loadDemoImages() {
   setHostLabel("https://example.com/gallery");
   state.images = [
     {
-      url: "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=1200&q=80",
+      url: "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fm=jpg&fit=crop&w=1200&q=80",
       pageUrl: "https://example.com/gallery",
       pageTitle: "Demo gallery",
       source: "img",
@@ -793,7 +793,7 @@ function loadDemoImages() {
       order: 0
     },
     {
-      url: "https://images.unsplash.com/photo-1493246507139-91e8fad9978e?auto=format&fit=crop&w=1200&q=80",
+      url: "https://images.unsplash.com/photo-1493246507139-91e8fad9978e?auto=format&fm=jpg&fit=crop&w=1200&q=80",
       pageUrl: "https://example.com/gallery",
       pageTitle: "Demo gallery",
       source: "background",
@@ -809,7 +809,7 @@ function loadDemoImages() {
       order: 1
     },
     {
-      url: "https://images.unsplash.com/photo-1516117172878-fd2c41f4a759?auto=format&fit=crop&w=900&q=80",
+      url: "https://images.unsplash.com/photo-1516117172878-fd2c41f4a759?auto=format&fm=jpg&fit=crop&w=900&q=80",
       pageUrl: "https://example.com/gallery",
       pageTitle: "Demo gallery",
       source: "resource",
@@ -825,7 +825,7 @@ function loadDemoImages() {
       order: 2
     },
     {
-      url: "https://images.unsplash.com/photo-1500534314209-a25ddb2bd429?auto=format&fit=crop&w=1100&q=80",
+      url: "https://images.unsplash.com/photo-1500534314209-a25ddb2bd429?auto=format&fm=jpg&fit=crop&w=1100&q=80",
       pageUrl: "https://example.com/gallery",
       pageTitle: "Demo gallery",
       source: "img",
@@ -841,7 +841,7 @@ function loadDemoImages() {
       order: 3
     },
     {
-      url: "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1000&q=80",
+      url: "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fm=jpg&fit=crop&w=1000&q=80",
       pageUrl: "https://example.com/gallery",
       pageTitle: "Demo gallery",
       source: "background",
@@ -857,7 +857,7 @@ function loadDemoImages() {
       order: 4
     },
     {
-      url: "https://images.unsplash.com/photo-1500534314209-a25ddb2bd429?auto=format&fit=crop&w=640&q=80",
+      url: "https://images.unsplash.com/photo-1500534314209-a25ddb2bd429?auto=format&fm=jpg&fit=crop&w=640&q=80",
       pageUrl: "https://example.com/gallery",
       pageTitle: "Demo gallery",
       source: "source",
@@ -873,7 +873,7 @@ function loadDemoImages() {
       order: 5
     },
     {
-      url: "https://images.unsplash.com/photo-1495567720989-cebdbdd97913?auto=format&fit=crop&w=720&q=80",
+      url: "https://images.unsplash.com/photo-1495567720989-cebdbdd97913?auto=format&fm=jpg&fit=crop&w=720&q=80",
       pageUrl: "https://example.com/gallery",
       pageTitle: "Demo gallery",
       source: "img",
@@ -889,7 +889,7 @@ function loadDemoImages() {
       order: 6
     },
     {
-      url: "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=420&q=80",
+      url: "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fm=jpg&fit=crop&w=420&q=80",
       pageUrl: "https://example.com/gallery",
       pageTitle: "Demo gallery",
       source: "resource",
@@ -999,3 +999,4 @@ function hashString(value) {
   }
   return Math.abs(hash).toString(36);
 }
+
