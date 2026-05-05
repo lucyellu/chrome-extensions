@@ -5,6 +5,7 @@ A Manifest V3 Chrome extension inspired by Session Buddy-style tab/session manag
 ## Features
 
 - Full-page dashboard opened from the extension toolbar.
+- Custom toolbar icon for easier identification in Chrome.
 - Local-first session storage using `chrome.storage.local`.
 - Automatic session snapshots on a routine alarm, defaulting to every 15 minutes.
 - Manual save flow that prompts for a session name.

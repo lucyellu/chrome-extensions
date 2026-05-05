@@ -12,7 +12,8 @@ A fresh Manifest V3 Chrome extension inspired by Imageye, with the image browser
 - Sorts largest-first by default, with a one-click reverse button for smallest-first.
 - Dark side-panel UI with settings collapsed by default.
 - Column slider defaults to 4 images per row and can range from a single-column view to 8 columns.
-- Quick JPG, PNG, and Other type chips.
+- Quick JPG, PNG, and Other type chips, with JPG and PNG enabled by default.
+- Custom toolbar icon for easier identification in Chrome.
 - Select all visible, clear selection, single-image download, and bulk download.
 - Download-all-visible shortcut.
 - Downloads originals or converts selected images to JPG, PNG, or WEBP.

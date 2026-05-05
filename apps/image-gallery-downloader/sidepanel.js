@@ -104,14 +104,14 @@ async function restorePreferences() {
     columns: 4,
     reverseSort: false,
     downloadFormat: "original",
-    typeGroups: ["jpeg", "png", "other"]
+    typeGroups: ["jpeg", "png"]
   });
 
-  if (prefs.prefsVersion !== 2) {
+  if (prefs.prefsVersion !== 3) {
     prefs.sortMode = "area";
     prefs.reverseSort = false;
     prefs.columns = 4;
-    prefs.typeGroups = ["jpeg", "png", "other"];
+    prefs.typeGroups = ["jpeg", "png"];
   }
 
   els.sortMode.value = prefs.sortMode;
@@ -129,7 +129,7 @@ function savePreferences() {
   if (!extensionApi) return;
 
   chrome.storage.local.set({
-    prefsVersion: 2,
+    prefsVersion: 3,
     sortMode: els.sortMode.value,
     visibleOnly: els.visibleOnly.checked,
     columns: state.columns,
