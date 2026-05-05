@@ -6,7 +6,7 @@ const state = {
   filtered: [],
   selected: new Set(),
   columns: 4,
-  minSize: 500,
+  minSize: 50,
   reverseSort: false,
   busy: false
 };
@@ -27,6 +27,7 @@ const els = {
   selectAllButton: document.querySelector("#selectAllButton"),
   clearSelectionButton: document.querySelector("#clearSelectionButton"),
   reverseButton: document.querySelector("#reverseButton"),
+  saveDefaultsButton: document.querySelector("#saveDefaultsButton"),
   downloadAllButton: document.querySelector("#downloadAllButton"),
   downloadButton: document.querySelector("#downloadButton"),
   downloadFormat: document.querySelector("#downloadFormat"),
@@ -58,6 +59,17 @@ const IMAGE_TYPES = new Map([
   ["ico", "ico"]
 ]);
 
+const PREFS_VERSION = 5;
+const DEFAULT_SETTINGS = {
+  sortMode: "area",
+  visibleOnly: false,
+  columns: 4,
+  minSize: 50,
+  reverseSort: false,
+  downloadFormat: "original",
+  typeGroups: ["jpeg", "png"]
+};
+
 init();
 
 async function init() {
@@ -84,6 +96,7 @@ function bindEvents() {
   els.selectAllButton.addEventListener("click", selectVisible);
   els.clearSelectionButton.addEventListener("click", clearSelection);
   els.reverseButton.addEventListener("click", toggleReverseSort);
+  els.saveDefaultsButton.addEventListener("click", saveCurrentSettingsAsDefault);
   els.downloadAllButton.addEventListener("click", downloadVisible);
   els.downloadButton.addEventListener("click", downloadSelected);
   els.downloadFormat.addEventListener("change", savePreferences);
@@ -101,30 +114,19 @@ function bindEvents() {
 async function restorePreferences() {
   if (!extensionApi) return;
 
-  const prefs = await chrome.storage.local.get({
+  const stored = await chrome.storage.local.get({
     prefsVersion: 0,
-    sortMode: "area",
-    visibleOnly: false,
-    columns: 4,
-    minSize: 500,
-    reverseSort: false,
-    downloadFormat: "original",
-    typeGroups: ["jpeg", "png"]
+    ...DEFAULT_SETTINGS,
+    savedDefaults: null
   });
+  const savedDefaults = normalizeSettings(stored.savedDefaults);
+  const prefs = stored.prefsVersion === PREFS_VERSION ? stored : { ...DEFAULT_SETTINGS, ...savedDefaults };
 
-  if (prefs.prefsVersion !== 4) {
-    prefs.sortMode = "area";
-    prefs.reverseSort = false;
-    prefs.columns = 4;
-    prefs.minSize = 500;
-    prefs.typeGroups = ["jpeg", "png"];
-  }
-
-  els.sortMode.value = prefs.sortMode;
-  els.visibleOnly.checked = prefs.visibleOnly;
-  els.downloadFormat.value = prefs.downloadFormat;
+  els.sortMode.value = prefs.sortMode || DEFAULT_SETTINGS.sortMode;
+  els.visibleOnly.checked = Boolean(prefs.visibleOnly);
+  els.downloadFormat.value = prefs.downloadFormat || DEFAULT_SETTINGS.downloadFormat;
   els.typeShortcuts.forEach((input) => {
-    input.checked = prefs.typeGroups.includes(input.value);
+    input.checked = (prefs.typeGroups || DEFAULT_SETTINGS.typeGroups).includes(input.value);
   });
   state.reverseSort = Boolean(prefs.reverseSort);
   setColumns(prefs.columns);
@@ -136,7 +138,29 @@ function savePreferences() {
   if (!extensionApi) return;
 
   chrome.storage.local.set({
-    prefsVersion: 4,
+    prefsVersion: PREFS_VERSION,
+    ...getCurrentSettings()
+  });
+}
+
+async function saveCurrentSettingsAsDefault() {
+  const settings = getCurrentSettings();
+
+  if (!extensionApi) {
+    toast("Load as an unpacked Chrome extension to save defaults.");
+    return;
+  }
+
+  await chrome.storage.local.set({
+    prefsVersion: PREFS_VERSION,
+    ...settings,
+    savedDefaults: settings
+  });
+  toast("Current settings saved as default.");
+}
+
+function getCurrentSettings() {
+  return {
     sortMode: els.sortMode.value,
     visibleOnly: els.visibleOnly.checked,
     columns: state.columns,
@@ -144,7 +168,23 @@ function savePreferences() {
     reverseSort: state.reverseSort,
     downloadFormat: els.downloadFormat.value,
     typeGroups: getSelectedTypeGroups()
-  });
+  };
+}
+
+function normalizeSettings(settings) {
+  if (!settings || typeof settings !== "object") return {};
+
+  const minSize = Number(settings.minSize);
+
+  return {
+    sortMode: settings.sortMode || DEFAULT_SETTINGS.sortMode,
+    visibleOnly: Boolean(settings.visibleOnly),
+    columns: Number(settings.columns) || DEFAULT_SETTINGS.columns,
+    minSize: Number.isFinite(minSize) ? minSize : DEFAULT_SETTINGS.minSize,
+    reverseSort: Boolean(settings.reverseSort),
+    downloadFormat: settings.downloadFormat || DEFAULT_SETTINGS.downloadFormat,
+    typeGroups: Array.isArray(settings.typeGroups) ? settings.typeGroups : DEFAULT_SETTINGS.typeGroups
+  };
 }
 
 async function scanActiveTab() {
@@ -710,7 +750,7 @@ function setColumns(columns = 4) {
   els.gallery.dataset.columns = String(state.columns);
 }
 
-function setMinSize(size = 500) {
+function setMinSize(size = 50) {
   state.minSize = Math.min(1600, Math.max(0, Number(size) || 0));
   els.minSizeRange.value = String(state.minSize);
   els.minSizeValue.textContent = state.minSize ? `${state.minSize}px+` : "Any";

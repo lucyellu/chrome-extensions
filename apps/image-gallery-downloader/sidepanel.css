@@ -499,9 +499,13 @@ svg {
 
 .settings-actions {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1.35fr);
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 8px;
   align-items: end;
+}
+
+.settings-actions .download-format {
+  grid-column: 1 / -1;
 }
 
 .primary-button {
