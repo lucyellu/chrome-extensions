@@ -78,21 +78,14 @@
                 <input class="typeShortcut" type="checkbox" value="png" checked>
                 <span>PNG</span>
               </label>
-              <label class="chip-check">
-                <input class="typeShortcut" type="checkbox" value="other">
-                <span>Other</span>
-              </label>
             </div>
 
+            <label class="size-slider">
+              <span>Minimum size <strong id="minSizeValue">500px+</strong></span>
+              <input id="minSizeRange" type="range" min="0" max="1600" step="50" value="500">
+            </label>
+
             <div class="filter-grid">
-              <label>
-                <span>Min width</span>
-                <input id="minWidth" type="number" min="0" step="50" placeholder="0">
-              </label>
-              <label>
-                <span>Min height</span>
-                <input id="minHeight" type="number" min="0" step="50" placeholder="0">
-              </label>
               <label>
                 <span>Sort</span>
                 <select id="sortMode">

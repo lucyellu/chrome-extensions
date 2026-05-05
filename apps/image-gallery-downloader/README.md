@@ -8,12 +8,12 @@ A fresh Manifest V3 Chrome extension inspired by Imageye, with the image browser
 - Scans the active tab for `img`, `picture/source`, CSS background images, video posters, favicons, and image-like resource entries.
 - Dedupes repeated URLs across frames and sources.
 - Gallery cards with thumbnail preview, source type, dimensions, display size, file type, and size metadata when available.
-- Filters by URL/text, minimum width, minimum height, file type, and visible-only.
+- Filters by URL/text, file type, visible-only, and an overall-size slider that defaults to images equivalent to 500 x 500 pixels or larger.
 - Sorts largest-first by default, with a one-click reverse button for smallest-first.
 - Dark side-panel UI with a minimal default toolbar and settings collapsed by default.
 - Default gallery cards are image-first, with selection controls hidden and a single-image download button shown on hover.
 - Column slider defaults to 4 images per row and can range from a single-column view to 8 columns.
-- Quick JPG, PNG, and Other type chips, with JPG and PNG enabled by default.
+- Quick JPG and PNG type chips, both enabled by default.
 - Custom toolbar icon for easier identification in Chrome.
 - Select all visible, clear selection, single-image download, and bulk download.
 - Download-all-visible shortcut.

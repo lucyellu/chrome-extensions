@@ -6,6 +6,7 @@ const state = {
   filtered: [],
   selected: new Set(),
   columns: 4,
+  minSize: 500,
   reverseSort: false,
   busy: false
 };
@@ -19,8 +20,8 @@ const els = {
   totalCount: document.querySelector("#totalCount"),
   selectedCount: document.querySelector("#selectedCount"),
   urlFilter: document.querySelector("#urlFilter"),
-  minWidth: document.querySelector("#minWidth"),
-  minHeight: document.querySelector("#minHeight"),
+  minSizeRange: document.querySelector("#minSizeRange"),
+  minSizeValue: document.querySelector("#minSizeValue"),
   sortMode: document.querySelector("#sortMode"),
   visibleOnly: document.querySelector("#visibleOnly"),
   selectAllButton: document.querySelector("#selectAllButton"),
@@ -62,6 +63,7 @@ init();
 async function init() {
   bindEvents();
   setColumns(state.columns);
+  setMinSize(state.minSize);
   updateReverseButton();
   await restorePreferences();
   await scanActiveTab();
@@ -70,8 +72,10 @@ async function init() {
 function bindEvents() {
   els.refreshButton.addEventListener("click", scanActiveTab);
   els.urlFilter.addEventListener("input", applyFilters);
-  els.minWidth.addEventListener("input", applyFilters);
-  els.minHeight.addEventListener("input", applyFilters);
+  els.minSizeRange.addEventListener("input", () => {
+    setMinSize(Number(els.minSizeRange.value));
+    applyFilters();
+  });
   els.sortMode.addEventListener("change", () => {
     savePreferences();
     applyFilters();
@@ -102,15 +106,17 @@ async function restorePreferences() {
     sortMode: "area",
     visibleOnly: false,
     columns: 4,
+    minSize: 500,
     reverseSort: false,
     downloadFormat: "original",
     typeGroups: ["jpeg", "png"]
   });
 
-  if (prefs.prefsVersion !== 3) {
+  if (prefs.prefsVersion !== 4) {
     prefs.sortMode = "area";
     prefs.reverseSort = false;
     prefs.columns = 4;
+    prefs.minSize = 500;
     prefs.typeGroups = ["jpeg", "png"];
   }
 
@@ -122,6 +128,7 @@ async function restorePreferences() {
   });
   state.reverseSort = Boolean(prefs.reverseSort);
   setColumns(prefs.columns);
+  setMinSize(prefs.minSize);
   updateReverseButton();
 }
 
@@ -129,10 +136,11 @@ function savePreferences() {
   if (!extensionApi) return;
 
   chrome.storage.local.set({
-    prefsVersion: 3,
+    prefsVersion: 4,
     sortMode: els.sortMode.value,
     visibleOnly: els.visibleOnly.checked,
     columns: state.columns,
+    minSize: state.minSize,
     reverseSort: state.reverseSort,
     downloadFormat: els.downloadFormat.value,
     typeGroups: getSelectedTypeGroups()
@@ -425,16 +433,13 @@ function normalizeUrlKey(url) {
 
 function applyFilters() {
   const query = els.urlFilter.value.trim().toLowerCase();
-  const minWidth = Number(els.minWidth.value) || 0;
-  const minHeight = Number(els.minHeight.value) || 0;
   const typeGroups = getSelectedTypeGroups();
   const visibleOnly = els.visibleOnly.checked;
 
   state.filtered = state.images.filter((image) => {
     const haystack = `${image.url} ${image.alt} ${image.fileName}`.toLowerCase();
     if (query && !haystack.includes(query)) return false;
-    if (minWidth && image.width < minWidth) return false;
-    if (minHeight && image.height < minHeight) return false;
+    if (state.minSize && getEquivalentSize(image) < state.minSize) return false;
     if (!matchesTypeGroups(image, typeGroups)) return false;
     if (visibleOnly && !image.visible) return false;
     return true;
@@ -466,7 +471,6 @@ function getSelectedTypeGroups() {
 }
 
 function matchesTypeGroups(image, groups) {
-  if (groups.length === 3) return true;
   if (!groups.length) return false;
   if (groups.includes("jpeg") && image.type === "jpeg") return true;
   if (groups.includes("png") && image.type === "png") return true;
@@ -704,6 +708,17 @@ function setColumns(columns = 4) {
   els.columnCount.textContent = String(state.columns);
   els.gallery.style.setProperty("--columns", String(state.columns));
   els.gallery.dataset.columns = String(state.columns);
+}
+
+function setMinSize(size = 500) {
+  state.minSize = Math.min(1600, Math.max(0, Number(size) || 0));
+  els.minSizeRange.value = String(state.minSize);
+  els.minSizeValue.textContent = state.minSize ? `${state.minSize}px+` : "Any";
+}
+
+function getEquivalentSize(image) {
+  const area = (Number(image.width) || 0) * (Number(image.height) || 0);
+  return area > 0 ? Math.sqrt(area) : 0;
 }
 
 function toggleReverseSort() {
