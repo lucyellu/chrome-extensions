@@ -1,0 +1,24 @@
+# OS/editor noise
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Logs and temporary output
+*.log
+tmp/
+temp/
+*.tmp
+
+# Extension QA artifacts
+qa-*.png
+qa-*.jpg
+qa-*.webp
+
+# Build/dependency output if future apps add toolchains
+node_modules/
+dist/
+build/
+coverage/
+.env
+.env.*
