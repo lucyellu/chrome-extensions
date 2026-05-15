@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Review Ads - Smart Ad Filter</title>
+    <link rel="icon" href="../icons/favicon.png">
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <main class="app-shell">
+      <header class="page-header">
+        <div>
+          <h1>Review Ads</h1>
+          <p>Decide what deserves attention. Everything else stays quiet.</p>
+        </div>
+        <div class="header-actions">
+          <button class="button primary" id="runSmartFilter">Run smart filter</button>
+          <button class="button" id="exportJson">Export JSON</button>
+          <button class="button" id="exportMarkdown">Export MD</button>
+        </div>
+      </header>
+
+      <section class="settings-panel" aria-label="Smart filter settings">
+        <div>
+          <h2>Smart Filter</h2>
+          <p id="smartStatus">Add a local API key, then let the model suggest yes/no for unreviewed saved ads.</p>
+        </div>
+        <form id="aiSettingsForm" class="settings-grid">
+          <label>
+            Provider
+            <input id="providerName" name="providerName" autocomplete="off">
+          </label>
+          <label>
+            Base URL
+            <input id="baseUrl" name="baseUrl" autocomplete="off">
+          </label>
+          <label>
+            Model
+            <input id="model" name="model" autocomplete="off">
+          </label>
+          <label>
+            API key
+            <input id="apiKey" name="apiKey" type="password" autocomplete="off" placeholder="Stored locally, not committed">
+          </label>
+          <button class="button" type="submit">Save settings</button>
+        </form>
+      </section>
+
+      <section class="toolbar" aria-label="Filters">
+        <button class="chip active" data-filter="all">All</button>
+        <button class="chip" data-filter="unreviewed">Unreviewed</button>
+        <button class="chip" data-filter="smart-yes">Smart yes</button>
+        <button class="chip" data-filter="yes">Yes</button>
+        <button class="chip" data-filter="no">No</button>
+      </section>
+
+      <section class="summary-row" aria-label="Summary">
+        <span><strong id="totalCount">0</strong> logged</span>
+        <span><strong id="unseenCount">0</strong> unseen</span>
+        <span><strong id="yesCount">0</strong> yes</span>
+        <span><strong id="noCount">0</strong> no</span>
+      </section>
+
+      <section id="eventList" class="event-list" aria-live="polite"></section>
+    </main>
+
+    <template id="eventTemplate">
+      <article class="event-card">
+        <div class="event-main">
+          <div class="event-title-row">
+            <h2></h2>
+            <span class="status"></span>
+          </div>
+          <p class="meta"></p>
+          <p class="suggestion"></p>
+          <figure class="snapshot">
+            <img alt="">
+            <figcaption></figcaption>
+          </figure>
+          <p class="url"></p>
+          <p class="notes"></p>
+        </div>
+        <div class="decision-actions">
+          <button class="button yes-button">Yes</button>
+          <button class="button no-button">No</button>
+          <button class="button rescind-button">Rescind</button>
+        </div>
+      </article>
+    </template>
+
+    <script type="module" src="review.js"></script>
+  </body>
+</html>

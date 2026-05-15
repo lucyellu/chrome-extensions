@@ -1,0 +1,23 @@
+{
+  "manifest_version": 3,
+  "name": "Chrome Home",
+  "short_name": "Home",
+  "version": "1.0.0",
+  "description": "A calm, focus-first new tab dashboard with search, tasks, shortcuts, weather, and daily inspiration.",
+  "icons": {
+    "16": "assets/icon-16.png",
+    "32": "assets/icon-32.png",
+    "48": "assets/icon-48.png",
+    "128": "assets/icon-128.png"
+  },
+  "permissions": [
+    "storage",
+    "geolocation"
+  ],
+  "chrome_url_overrides": {
+    "newtab": "newtab.html"
+  },
+  "content_security_policy": {
+    "extension_pages": "script-src 'self'; object-src 'self'; connect-src https://api.open-meteo.com https://geocoding-api.open-meteo.com;"
+  }
+}

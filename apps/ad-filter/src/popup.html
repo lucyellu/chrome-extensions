@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Smart Ad Filter</title>
+    <link rel="icon" href="../icons/favicon.png">
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body class="popup">
+    <main>
+      <header class="popup-header">
+        <div>
+          <h1>Smart Ad Filter</h1>
+          <p>Blocked now. Reviewed later.</p>
+        </div>
+      </header>
+
+      <section class="stats-grid" aria-label="Ad review stats">
+        <article>
+          <strong id="totalCount">0</strong>
+          <span>Logged</span>
+        </article>
+        <article>
+          <strong id="unseenCount">0</strong>
+          <span>Unseen</span>
+        </article>
+        <article>
+          <strong id="yesCount">0</strong>
+          <span>Yes</span>
+        </article>
+        <article>
+          <strong id="noCount">0</strong>
+          <span>No</span>
+        </article>
+      </section>
+
+      <nav class="actions" aria-label="Actions">
+        <a class="button primary" href="review.html" target="_blank">Review ads</a>
+        <button class="button" id="exportMarkdown">Export MD</button>
+      </nav>
+    </main>
+    <script type="module" src="popup.js"></script>
+  </body>
+</html>

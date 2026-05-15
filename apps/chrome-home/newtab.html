@@ -1,0 +1,145 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="color-scheme" content="dark">
+    <title>Chrome Home</title>
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <main class="dashboard" id="dashboard">
+      <div class="backdrop" id="backdrop" aria-hidden="true">
+        <canvas id="liquidCanvas"></canvas>
+      </div>
+      <div class="grain-overlay" aria-hidden="true"></div>
+      <div class="scrim" aria-hidden="true"></div>
+
+      <section class="topbar" aria-label="Dashboard tools">
+        <div class="shortcuts" id="shortcutsRegion">
+          <div class="shortcut-list" id="shortcutList" aria-label="Shortcuts"></div>
+          <button class="icon-button soft" id="addShortcutButton" type="button" aria-label="Add shortcut" title="Add shortcut">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+          </button>
+        </div>
+
+        <div class="top-actions">
+          <button class="weather-button" id="weatherButton" type="button" title="Refresh weather">
+            <span id="weatherIcon" aria-hidden="true">--</span>
+            <span id="weatherSummary">Weather</span>
+          </button>
+          <button class="text-button" id="todoToggle" type="button">Todo</button>
+        </div>
+      </section>
+
+      <section class="center-stage" aria-label="Focus dashboard">
+        <div class="clock flip-clock" id="clock" aria-label="Current time"></div>
+        <h1 id="greeting">Good evening.</h1>
+
+        <form class="search" id="searchForm" autocomplete="off">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m16.5 16.5 4 4"/></svg>
+          <input id="searchInput" name="q" type="search" placeholder="Search the web" aria-label="Search the web">
+        </form>
+
+        <div class="focus-card" id="focusCard">
+          <div class="focus-prompt" id="focusPrompt">
+            <p>What is your main focus today?</p>
+            <form id="focusForm">
+              <input id="focusInput" type="text" maxlength="90" autocomplete="off" aria-label="Today's focus">
+              <button class="primary-button" type="submit">Set</button>
+            </form>
+          </div>
+          <div class="focus-current hidden" id="focusCurrent">
+            <p>Today</p>
+            <label class="focus-check">
+              <input id="focusDone" type="checkbox">
+              <span id="focusText"></span>
+            </label>
+            <button class="icon-button ghost" id="clearFocus" type="button" aria-label="Clear focus" title="Clear focus">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"/></svg>
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <section class="bottom-bar" aria-label="Inspiration and settings">
+        <button class="icon-button soft" id="settingsButton" type="button" aria-label="Settings" title="Settings">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 15.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7Z"/><path d="M19.4 15a1.8 1.8 0 0 0 .36 1.98l.04.04a2.1 2.1 0 1 1-2.98 2.98l-.04-.04A1.8 1.8 0 0 0 14.8 19.6a1.8 1.8 0 0 0-1.08 1.64V21.4a2.1 2.1 0 1 1-4.2 0v-.16A1.8 1.8 0 0 0 8.44 19.6a1.8 1.8 0 0 0-1.98.36l-.04.04a2.1 2.1 0 1 1-2.98-2.98l.04-.04A1.8 1.8 0 0 0 3.84 15a1.8 1.8 0 0 0-1.64-1.08H2.1a2.1 2.1 0 1 1 0-4.2h.1a1.8 1.8 0 0 0 1.64-1.08 1.8 1.8 0 0 0-.36-1.98l-.04-.04a2.1 2.1 0 1 1 2.98-2.98l.04.04a1.8 1.8 0 0 0 1.98.36 1.8 1.8 0 0 0 1.08-1.64V2.1a2.1 2.1 0 1 1 4.2 0v.3a1.8 1.8 0 0 0 1.08 1.64 1.8 1.8 0 0 0 1.98-.36l.04-.04a2.1 2.1 0 1 1 2.98 2.98l-.04.04a1.8 1.8 0 0 0-.36 1.98 1.8 1.8 0 0 0 1.64 1.08h.3a2.1 2.1 0 1 1 0 4.2h-.3A1.8 1.8 0 0 0 19.4 15Z"/></svg>
+        </button>
+        <figure class="quote" id="quoteRegion">
+          <blockquote id="quoteText"></blockquote>
+          <figcaption id="quoteAuthor"></figcaption>
+        </figure>
+      </section>
+    </main>
+
+    <aside class="drawer" id="todoDrawer" aria-label="Todo list" aria-hidden="true">
+      <div class="panel-header">
+        <h2>Todo</h2>
+        <button class="icon-button ghost" id="closeTodo" type="button" aria-label="Close todo" title="Close">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"/></svg>
+        </button>
+      </div>
+      <form class="add-row" id="todoForm">
+        <input id="todoInput" type="text" maxlength="120" autocomplete="off" placeholder="Add a task" aria-label="Add a task">
+        <button class="icon-button solid" type="submit" aria-label="Add task" title="Add task">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+        </button>
+      </form>
+      <ul class="todo-list" id="todoList"></ul>
+      <button class="text-button quiet" id="clearCompleted" type="button">Clear completed</button>
+    </aside>
+
+    <dialog class="modal" id="shortcutDialog">
+      <form method="dialog" class="panel-form" id="shortcutForm">
+        <div class="panel-header">
+          <h2>Add shortcut</h2>
+          <button class="icon-button ghost" id="closeShortcutDialog" type="button" aria-label="Close shortcut form" title="Close">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"/></svg>
+          </button>
+        </div>
+        <label>Name<input id="shortcutName" type="text" maxlength="24" required></label>
+        <label>URL<input id="shortcutUrl" type="url" placeholder="https://example.com" required></label>
+        <button class="primary-button wide" value="default" type="submit">Save shortcut</button>
+      </form>
+    </dialog>
+
+    <dialog class="modal" id="settingsDialog">
+      <form method="dialog" class="panel-form settings-form" id="settingsForm">
+        <div class="panel-header">
+          <h2>Settings</h2>
+          <button class="icon-button ghost" id="closeSettingsDialog" type="button" aria-label="Close settings" title="Close">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"/></svg>
+          </button>
+        </div>
+
+        <label>Your name<input id="nameInput" type="text" maxlength="32" autocomplete="name"></label>
+        <label>Search provider<select id="searchProvider"></select></label>
+        <label>Weather city<input id="weatherLocation" type="text" maxlength="80" placeholder="Use my location"></label>
+        <label>Units<select id="weatherUnits"><option value="fahrenheit">Fahrenheit</option><option value="celsius">Celsius</option></select></label>
+
+        <fieldset>
+          <legend>Show</legend>
+          <label class="switch"><input id="showWeather" type="checkbox"><span>Weather</span></label>
+          <label class="switch"><input id="showShortcuts" type="checkbox"><span>Shortcuts</span></label>
+          <label class="switch"><input id="showTodo" type="checkbox"><span>Todo</span></label>
+          <label class="switch"><input id="showQuote" type="checkbox"><span>Quote</span></label>
+        </fieldset>
+
+        <div class="form-actions">
+          <button class="text-button quiet" id="locateButton" type="button">Use my location</button>
+          <button class="primary-button" value="default" type="submit">Done</button>
+        </div>
+      </form>
+    </dialog>
+
+    <svg class="noise-svg" aria-hidden="true" focusable="false">
+      <filter id="noiseFilter">
+        <feTurbulence type="fractalNoise" baseFrequency="0.62" numOctaves="3" stitchTiles="stitch"></feTurbulence>
+        <feColorMatrix type="saturate" values="0"></feColorMatrix>
+      </filter>
+    </svg>
+
+    <script src="newtab.js"></script>
+  </body>
+</html>

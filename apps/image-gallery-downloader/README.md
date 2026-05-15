@@ -27,12 +27,7 @@ A fresh Manifest V3 Chrome extension inspired by Imageye, with the image browser
 1. Open `chrome://extensions`.
 2. Enable `Developer mode`.
 3. Click `Load unpacked`.
-4. Select:
-
-   ```text
-   C:\Users\lucyl\Desktop\hold\projects\chrome_extensions\image-gallery-downloader
-   ```
-
+4. Select this app folder.
 5. Open any normal webpage and click the extension icon. Chrome opens the side panel and starts scanning.
 
 ## Notes
