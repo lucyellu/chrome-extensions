@@ -14,7 +14,8 @@
   ],
   "host_permissions": [
     "https://codepen.io/*",
-    "https://cdpn.io/*"
+    "https://cdpn.io/*",
+    "https://api.deepseek.com/*"
   ],
   "background": {
     "service_worker": "assets/background.js",
