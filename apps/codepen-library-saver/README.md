@@ -16,15 +16,30 @@ A Manifest V3 Chrome extension that opens as a companion side panel on CodePen a
 - Exports the full library as a restorable ZIP with `library.json`, `metadata.json`, and HTML files.
 - Imports a previously exported library ZIP on another Chrome profile.
 - Imports a folder of loose `.html` files exported earlier.
-- Seeds an empty local library from `imports/codepen-library-seed.json` when that file exists.
+- Seeds an empty local library from `public/imports/codepen-library-seed.json` when that file exists.
 - Repairs older saved entries by refetching runnable CodePen Debug View HTML when available, then overwriting the downloaded `.html` files.
+
+## Build
+
+```bash
+npm install
+npm run build
+```
+
+The unpacked extension is generated in:
+
+```text
+dist
+```
+
+This project also includes a root `manifest.json`, so Chrome can load either the project folder or the `dist` folder.
 
 ## Install In Chrome
 
 1. Open `chrome://extensions`.
 2. Enable **Developer mode**.
 3. Click **Load unpacked**.
-4. Select this app folder.
+4. Select this project folder, or select the `dist` folder directly.
 5. Pin **CodePen Library Saver** and open any CodePen Pen.
 
 ## Folder Behavior

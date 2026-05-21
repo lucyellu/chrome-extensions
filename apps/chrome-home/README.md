@@ -21,7 +21,7 @@ The flip-card clock is adapted from Adem Ilter's CodePen, [Countdown Clock](http
 1. Open `chrome://extensions`.
 2. Enable **Developer mode**.
 3. Choose **Load unpacked**.
-4. Select this app folder.
+4. Select `C:\Users\lucyl\Desktop\hold\projects\chrome_extensions\chrome-home`.
 
 Chrome will ask whether to keep the new-tab override after install. Choose **Keep it** to use Chrome Home on new tabs.
 

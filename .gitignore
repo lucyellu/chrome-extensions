@@ -22,3 +22,7 @@ build/
 coverage/
 .env
 .env.*
+
+# Tracked build output for apps that ship pre-built so users can Load Unpacked
+!apps/codepen-library-saver/dist/
+!apps/codepen-library-saver/dist/**

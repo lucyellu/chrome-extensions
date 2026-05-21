@@ -9,6 +9,7 @@ const state = {
 };
 
 const extensionApi = typeof chrome !== "undefined" && chrome.runtime?.sendMessage;
+const thumbnailCache = new Map();
 
 const els = {
   autosaveLabel: document.querySelector("#autosaveLabel"),
@@ -209,11 +210,18 @@ function renderWindows(container, windows) {
     fragment.appendChild(node);
   });
   container.appendChild(fragment);
+  hydrateThumbnails(container);
 }
 
 function createTabRow(tab) {
   const node = els.tabTemplate.content.firstElementChild.cloneNode(true);
+  const thumbnail = node.querySelector(".tab-thumbnail");
   const favicon = node.querySelector(".favicon");
+  const thumbnailUrl = tab.thumbnailUrl || thumbnailCache.get(tab.thumbnailId) || "";
+  const hasThumbnail = Boolean(thumbnailUrl || tab.thumbnailId);
+  node.classList.toggle("no-thumbnail", !hasThumbnail);
+  thumbnail.dataset.thumbnailId = tab.thumbnailId || "";
+  setImageSource(thumbnail, thumbnailUrl);
   favicon.src = tab.favIconUrl || "";
   favicon.style.visibility = tab.favIconUrl ? "visible" : "hidden";
   node.querySelector(".tab-title").textContent = tab.title || tab.url || "Untitled";
@@ -222,6 +230,43 @@ function createTabRow(tab) {
   link.href = tab.url || "#";
   link.style.visibility = tab.url ? "visible" : "hidden";
   return node;
+}
+
+async function hydrateThumbnails(container) {
+  if (!extensionApi) return;
+
+  const images = [...container.querySelectorAll(".tab-thumbnail[data-thumbnail-id]")].filter((image) => {
+    const id = image.dataset.thumbnailId;
+    return id && !image.getAttribute("src");
+  });
+  const missingIds = [...new Set(images.map((image) => image.dataset.thumbnailId).filter((id) => !thumbnailCache.has(id)))];
+
+  if (missingIds.length) {
+    const response = await sendMessage({ type: "GET_THUMBNAILS", ids: missingIds });
+    Object.entries(response.thumbnails || {}).forEach(([id, dataUrl]) => thumbnailCache.set(id, dataUrl));
+  }
+
+  images.forEach((image) => {
+    const id = image.dataset.thumbnailId;
+    const dataUrl = thumbnailCache.get(id);
+    if (dataUrl) {
+      setImageSource(image, dataUrl);
+      image.closest(".tab-row")?.classList.remove("no-thumbnail");
+    } else {
+      image.closest(".tab-row")?.classList.add("no-thumbnail");
+    }
+  });
+}
+
+function setImageSource(image, src) {
+  if (src) {
+    image.src = src;
+    image.style.visibility = "visible";
+    return;
+  }
+
+  image.removeAttribute("src");
+  image.style.visibility = "hidden";
 }
 
 async function copySelectedSession() {

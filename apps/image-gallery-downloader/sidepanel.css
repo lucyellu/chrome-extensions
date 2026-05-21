@@ -715,7 +715,7 @@ svg {
 
 .meta,
 .source-line {
-  display: none;
+  display: block;
   overflow: hidden;
   color: var(--muted);
   font-size: 10px;

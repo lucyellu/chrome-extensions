@@ -23,3 +23,4 @@ export function safeUrlLabel(value) {
     return value.slice(0, 96);
   }
 }
+

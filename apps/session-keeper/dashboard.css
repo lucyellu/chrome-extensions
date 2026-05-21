@@ -18,9 +18,7 @@
   --danger: #ff6d5d;
   --radius: 8px;
   --shadow: 0 20px 60px rgba(0, 0, 0, 0.35);
-  font-family:
-    Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
-    sans-serif;
+  font-family: "Helvetica Neue", Helvetica, Arial, ui-sans-serif, system-ui, sans-serif;
 }
 
 * {
@@ -406,21 +404,61 @@ h2 {
 
 .tab-row {
   display: grid;
-  grid-template-columns: 24px minmax(0, 1fr) auto;
+  grid-template-columns: 104px minmax(0, 1fr) auto;
   gap: 10px;
   align-items: center;
-  min-height: 54px;
+  min-height: 78px;
   padding: 9px;
   background: #101722;
   border: 1px solid rgba(255, 255, 255, 0.04);
   border-radius: var(--radius);
 }
 
+.tab-row.no-thumbnail {
+  grid-template-columns: 44px minmax(0, 1fr) auto;
+  min-height: 54px;
+}
+
+.tab-preview {
+  position: relative;
+  width: 96px;
+  height: 60px;
+  display: grid;
+  place-items: center;
+  margin: 0;
+  overflow: hidden;
+  background: #0b111a;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+}
+
+.tab-thumbnail {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.no-thumbnail .tab-preview {
+  width: 36px;
+  height: 36px;
+}
+
 .favicon {
-  width: 20px;
-  height: 20px;
+  position: absolute;
+  left: 6px;
+  bottom: 6px;
+  width: 18px;
+  height: 18px;
   border-radius: 5px;
   background: var(--panel-strong);
+  box-shadow: 0 0 0 2px rgba(11, 17, 26, 0.86);
+}
+
+.no-thumbnail .favicon {
+  position: static;
+  width: 24px;
+  height: 24px;
+  box-shadow: none;
 }
 
 .tab-title,

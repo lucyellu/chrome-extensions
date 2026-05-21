@@ -5,10 +5,15 @@
   "version": "1.0.0",
   "minimum_chrome_version": "110",
   "permissions": [
+    "activeTab",
     "alarms",
     "downloads",
     "storage",
-    "tabs"
+    "tabs",
+    "unlimitedStorage"
+  ],
+  "host_permissions": [
+    "<all_urls>"
   ],
   "action": {
     "default_title": "Open Session Keeper",

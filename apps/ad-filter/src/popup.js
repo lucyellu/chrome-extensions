@@ -26,3 +26,4 @@ async function renderStats() {
 function markdownName() {
   return `smart-ad-filter-${new Date().toISOString().slice(0, 10)}.md`;
 }
+

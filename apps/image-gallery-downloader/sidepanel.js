@@ -8,7 +8,8 @@ const state = {
   columns: 4,
   minSize: 50,
   reverseSort: false,
-  busy: false
+  busy: false,
+  enrichToken: 0
 };
 
 const extensionApi = typeof chrome !== "undefined" && chrome.tabs && chrome.scripting && chrome.downloads;
@@ -24,6 +25,7 @@ const els = {
   minSizeValue: document.querySelector("#minSizeValue"),
   sortMode: document.querySelector("#sortMode"),
   visibleOnly: document.querySelector("#visibleOnly"),
+  dedupeVariants: document.querySelector("#dedupeVariants"),
   selectAllButton: document.querySelector("#selectAllButton"),
   clearSelectionButton: document.querySelector("#clearSelectionButton"),
   reverseButton: document.querySelector("#reverseButton"),
@@ -59,10 +61,11 @@ const IMAGE_TYPES = new Map([
   ["ico", "ico"]
 ]);
 
-const PREFS_VERSION = 5;
+const PREFS_VERSION = 6;
 const DEFAULT_SETTINGS = {
   sortMode: "area",
   visibleOnly: false,
+  dedupeVariants: true,
   columns: 4,
   minSize: 50,
   reverseSort: false,
@@ -93,6 +96,7 @@ function bindEvents() {
     applyFilters();
   });
   els.visibleOnly.addEventListener("change", applyFilters);
+  els.dedupeVariants.addEventListener("change", applyFilters);
   els.selectAllButton.addEventListener("click", selectVisible);
   els.clearSelectionButton.addEventListener("click", clearSelection);
   els.reverseButton.addEventListener("click", toggleReverseSort);
@@ -124,6 +128,7 @@ async function restorePreferences() {
 
   els.sortMode.value = prefs.sortMode || DEFAULT_SETTINGS.sortMode;
   els.visibleOnly.checked = Boolean(prefs.visibleOnly);
+  els.dedupeVariants.checked = prefs.dedupeVariants !== false;
   els.downloadFormat.value = prefs.downloadFormat || DEFAULT_SETTINGS.downloadFormat;
   els.typeShortcuts.forEach((input) => {
     input.checked = (prefs.typeGroups || DEFAULT_SETTINGS.typeGroups).includes(input.value);
@@ -163,6 +168,7 @@ function getCurrentSettings() {
   return {
     sortMode: els.sortMode.value,
     visibleOnly: els.visibleOnly.checked,
+    dedupeVariants: els.dedupeVariants.checked,
     columns: state.columns,
     minSize: state.minSize,
     reverseSort: state.reverseSort,
@@ -179,6 +185,7 @@ function normalizeSettings(settings) {
   return {
     sortMode: settings.sortMode || DEFAULT_SETTINGS.sortMode,
     visibleOnly: Boolean(settings.visibleOnly),
+    dedupeVariants: settings.dedupeVariants !== false,
     columns: Number(settings.columns) || DEFAULT_SETTINGS.columns,
     minSize: Number.isFinite(minSize) ? minSize : DEFAULT_SETTINGS.minSize,
     reverseSort: Boolean(settings.reverseSort),
@@ -220,8 +227,8 @@ async function scanActiveTab() {
     });
 
     state.images = dedupeImages(rawImages);
+    state.busy = false;
     applyFilters();
-    enrichVisibleMetadata();
   } catch (error) {
     console.error(error);
     state.images = [];
@@ -432,14 +439,86 @@ function dedupeImages(rawImages) {
     });
   });
 
-  return Array.from(byUrl.values()).map((image, index) => ({
+  const merged = Array.from(byUrl.values()).map((image, index) => ({
     ...image,
     id: `${index}-${hashString(image.url)}`,
     fileName: getFileName(image.url, index),
     type: getImageType(image.url),
     area: image.width * image.height,
-    sizeLabel: ""
+    sizeLabel: "",
+    sizeBytes: 0
   }));
+
+  return assignVariantGroups(merged);
+}
+
+function assignVariantGroups(images) {
+  const groups = new Map();
+  images.forEach((image) => {
+    const key = normalizeGroupKey(image.url);
+    image.groupKey = key;
+    if (!groups.has(key)) groups.set(key, []);
+    groups.get(key).push(image);
+  });
+
+  groups.forEach((group) => {
+    group.sort(
+      (a, b) =>
+        (b.area || 0) - (a.area || 0) ||
+        (b.width || 0) - (a.width || 0) ||
+        (b.url.length || 0) - (a.url.length || 0)
+    );
+    const largest = group[0];
+    group.forEach((image) => {
+      image.groupSize = group.length;
+      image.isLargestInGroup = image === largest;
+      image.variantUrls = group.map((g) => g.url);
+    });
+  });
+
+  return images;
+}
+
+function normalizeGroupKey(url) {
+  try {
+    const parsed = new URL(url);
+    let path = parsed.pathname;
+
+    // Strip Cloudinary / Imgix-style transformation segments (e.g. /w_300,h_200/)
+    path = path.replace(/\/(?:[a-z]_[a-z0-9_.,:-]+)(?:,[a-z]_[a-z0-9_.,:-]+)*(?=\/)/gi, "");
+    // Strip word-based resize segments (/resize/, /thumbnail/, /large/, /originals/)
+    path = path.replace(/\/(?:resize|thumb(?:nail)?|scaled|small|medium|large|xlarge|full|orig(?:inals?)?)(?=\/|$)/gi, "");
+    // Strip dimension segments (/300x200/, /236x/) — must include 'x' to avoid stripping year/id folders.
+    path = path.replace(/\/\d{2,4}x\d{0,4}(?=\/)/g, "");
+
+    const segments = path.split("/").filter(Boolean);
+    const fileName = segments.pop() || "";
+    const extMatch = fileName.match(/\.([a-z0-9]{2,5})$/i);
+    const ext = extMatch ? `.${extMatch[1].toLowerCase()}` : "";
+    let base = ext ? fileName.slice(0, -ext.length) : fileName;
+
+    // Strip size hints from the filename: _300x200, -1200w, @2x, -150, .thumb
+    base = base.replace(/[-_]?\d{2,4}x\d{2,4}$/i, "");
+    base = base.replace(/[-_]?@\d+x$/i, "");
+    base = base.replace(/[-_]?\d{2,4}[wh]$/i, "");
+    base = base.replace(/[-_.](?:thumb|small|medium|large|xlarge|full|orig|original|preview)$/i, "");
+    base = base.replace(/[-_]s\d{2,4}$/i, "");
+
+    // Pinterest fans pins out across i.pinimg.com, i1-c.pinimg.com, etc. — collapse those.
+    const host = parsed.hostname.replace(/^i\d*(?:-[a-z0-9]+)?\.pinimg\.com$/i, "i.pinimg.com");
+
+    // When the filename is a content hash (long alphanumeric, no separators), the path is just
+    // CDN sharding (e.g. Pinterest's /ab/cd/ef/<hash>.jpg) and varies between size variants on
+    // some hosts. Group by host + filename only.
+    if (/^[a-z0-9]{12,}$/i.test(base)) {
+      return `${host}/${base.toLowerCase()}${ext}`;
+    }
+
+    const cleanPath = [...segments, `${base}${ext}`].join("/").toLowerCase();
+    return `${host}/${cleanPath}`;
+  } catch {
+    return url;
+  }
 }
 
 function normalizeImage(image) {
@@ -475,8 +554,10 @@ function applyFilters() {
   const query = els.urlFilter.value.trim().toLowerCase();
   const typeGroups = getSelectedTypeGroups();
   const visibleOnly = els.visibleOnly.checked;
+  const dedupeVariants = els.dedupeVariants.checked;
 
   state.filtered = state.images.filter((image) => {
+    if (dedupeVariants && !image.isLargestInGroup) return false;
     const haystack = `${image.url} ${image.alt} ${image.fileName}`.toLowerCase();
     if (query && !haystack.includes(query)) return false;
     if (state.minSize && getEquivalentSize(image) < state.minSize) return false;
@@ -490,6 +571,7 @@ function applyFilters() {
   savePreferences();
   renderGallery();
   updateCounts();
+  enrichVisibleMetadata();
 }
 
 function sortImages(images, mode) {
@@ -586,7 +668,8 @@ function createCard(image) {
 function buildMetaLine(image) {
   const dimensions = image.width && image.height ? `${image.width} x ${image.height}` : "size unknown";
   const display = image.displayWidth && image.displayHeight ? `shown ${image.displayWidth} x ${image.displayHeight}` : "";
-  return [dimensions, image.sizeLabel, display].filter(Boolean).join(" · ");
+  const variants = image.groupSize > 1 ? `${image.groupSize} variants` : "";
+  return [dimensions, image.sizeLabel, variants, display].filter(Boolean).join(" · ");
 }
 
 function updateCounts() {
@@ -774,16 +857,24 @@ function updateReverseButton() {
 }
 
 async function enrichVisibleMetadata() {
-  const candidates = state.filtered.slice(0, 80).filter((image) => !image.sizeLabel);
+  const token = ++state.enrichToken;
+  const candidates = state.filtered.slice(0, 80).filter((image) => !image.sizeLabel && !image.enrichTried);
+
   await Promise.allSettled(candidates.map(enrichOneImage));
+
+  if (token !== state.enrichToken) return;
   renderGallery();
 }
 
 async function enrichOneImage(image) {
+  image.enrichTried = true;
+
   if (image.url.startsWith("data:")) {
     const [meta, data = ""] = image.url.split(",");
     image.type = mimeToType(meta.match(/data:([^;]+)/)?.[1]) || image.type;
-    image.sizeLabel = formatBytes(Math.ceil((data.length * 3) / 4));
+    const bytes = Math.ceil((data.length * 3) / 4);
+    image.sizeBytes = bytes;
+    image.sizeLabel = formatBytes(bytes);
     return;
   }
 
@@ -800,7 +891,12 @@ async function enrichOneImage(image) {
     const mimeType = response.headers.get("content-type");
     const length = Number(response.headers.get("content-length"));
     image.type = mimeToType(mimeType) || image.type;
-    image.sizeLabel = Number.isFinite(length) && length > 0 ? formatBytes(length) : image.sizeLabel;
+    if (Number.isFinite(length) && length > 0) {
+      image.sizeBytes = length;
+      image.sizeLabel = formatBytes(length);
+    }
+  } catch {
+    // Network/CORS failures leave sizeLabel empty; UI still shows pixel dimensions.
   } finally {
     clearTimeout(timeout);
   }
@@ -965,8 +1061,10 @@ function loadDemoImages() {
     fileName: getFileName(image.url, index),
     type: getImageType(image.url),
     area: image.width * image.height,
-    sizeLabel: ""
+    sizeLabel: "",
+    sizeBytes: 0
   }));
+  state.images = assignVariantGroups(state.images);
   applyFilters();
   toast("Preview mode. Load the folder as an unpacked extension for live scanning.");
 }
