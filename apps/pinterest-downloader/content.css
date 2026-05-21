@@ -1,0 +1,67 @@
+.__pin-dl-host {
+  position: relative !important;
+}
+
+.__pin-dl-btn {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  z-index: 2147483600;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  margin: 0;
+  border: 0;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.96);
+  color: #111;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.18), 0 2px 8px rgba(0, 0, 0, 0.12);
+  cursor: pointer;
+  opacity: 0;
+  transform: translateY(-2px);
+  transition: opacity 120ms ease, transform 120ms ease, background 120ms ease, color 120ms ease;
+  pointer-events: none;
+  font: inherit;
+}
+
+.__pin-dl-host:hover > .__pin-dl-btn,
+.__pin-dl-btn:focus-visible,
+.__pin-dl-btn.working,
+.__pin-dl-btn.success,
+.__pin-dl-btn.error {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+
+.__pin-dl-btn:hover {
+  background: #ffffff;
+  transform: translateY(0) scale(1.05);
+}
+
+.__pin-dl-btn:active {
+  transform: translateY(0) scale(0.96);
+}
+
+.__pin-dl-btn.working {
+  background: #fff4d4;
+  color: #7a4a00;
+}
+
+.__pin-dl-btn.success {
+  background: #d6f5e1;
+  color: #0c5a31;
+}
+
+.__pin-dl-btn.error {
+  background: #ffe2e2;
+  color: #8a1212;
+}
+
+.__pin-dl-btn svg {
+  display: block;
+  pointer-events: none;
+}

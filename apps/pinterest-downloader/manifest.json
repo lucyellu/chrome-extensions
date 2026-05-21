@@ -1,0 +1,43 @@
+{
+  "manifest_version": 3,
+  "name": "Pinterest Downloader",
+  "description": "Adds a download button to Pinterest pins for the highest-resolution image or video.",
+  "version": "0.1.0",
+  "permissions": [
+    "downloads"
+  ],
+  "host_permissions": [
+    "https://*.pinterest.com/*",
+    "https://*.pinterest.co.uk/*",
+    "https://*.pinterest.ca/*",
+    "https://*.pinterest.com.au/*",
+    "https://*.pinterest.de/*",
+    "https://*.pinterest.fr/*",
+    "https://*.pinterest.jp/*",
+    "https://i.pinimg.com/*",
+    "https://v.pinimg.com/*",
+    "https://v1.pinimg.com/*"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "https://*.pinterest.com/*",
+        "https://*.pinterest.co.uk/*",
+        "https://*.pinterest.ca/*",
+        "https://*.pinterest.com.au/*",
+        "https://*.pinterest.de/*",
+        "https://*.pinterest.fr/*",
+        "https://*.pinterest.jp/*"
+      ],
+      "js": ["content.js"],
+      "css": ["content.css"],
+      "run_at": "document_idle"
+    }
+  ],
+  "action": {
+    "default_title": "Pinterest Downloader"
+  }
+}
