@@ -1,0 +1,45 @@
+{
+  "manifest_version": 3,
+  "name": "Speed Read",
+  "version": "0.1.0",
+  "description": "On-device one-line summaries of any page — ELI5, elevator pitch, postdoc abstract — powered by Chrome's built-in Gemini Nano.",
+  "minimum_chrome_version": "138",
+  "permissions": ["storage", "scripting", "contextMenus", "sidePanel", "offscreen", "activeTab"],
+  "host_permissions": ["http://*/*", "https://*/*"],
+  "background": {
+    "service_worker": "background.js",
+    "type": "module"
+  },
+  "action": {
+    "default_title": "Speed Read this page (Alt+S)",
+    "default_icon": {
+      "16": "icons/icon16.png",
+      "32": "icons/icon32.png",
+      "48": "icons/icon48.png",
+      "128": "icons/icon128.png"
+    }
+  },
+  "icons": {
+    "16": "icons/icon16.png",
+    "32": "icons/icon32.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  },
+  "side_panel": {
+    "default_path": "sidepanel.html"
+  },
+  "options_ui": {
+    "page": "options.html",
+    "open_in_tab": true
+  },
+  "commands": {
+    "summarize-page": {
+      "suggested_key": { "default": "Alt+S" },
+      "description": "Summarize the current page"
+    },
+    "open-side-panel": {
+      "suggested_key": { "default": "Alt+Shift+S" },
+      "description": "Open the Speed Read side panel"
+    }
+  }
+}

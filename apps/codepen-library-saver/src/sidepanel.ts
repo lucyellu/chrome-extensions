@@ -65,6 +65,14 @@ function render(): void {
         <span aria-hidden="true">${icons.tabs}</span>
         All tabs
       </button>
+      <button class="thin-button" id="find-latest-file" type="button" title="Find the newest downloaded HTML file in local File Explorer">
+        <span aria-hidden="true">${icons.folder}</span>
+        Find
+      </button>
+      <button class="thin-button" id="import-folder-quick" type="button" title="Import local HTML files from the CodePen Library folder">
+        <span aria-hidden="true">${icons.upload}</span>
+        Import
+      </button>
       <button class="icon-button" id="open-library-folder" type="button" title="Open Chrome downloads folder" aria-label="Open Chrome downloads folder">${icons.folderOpen}</button>
       <button class="thin-button settings-toggle" id="toggle-settings" type="button" aria-expanded="${settings.settingsExpanded}" title="${settings.settingsExpanded ? "Collapse settings" : "Expand settings"}">
         <span aria-hidden="true">${settings.settingsExpanded ? icons.chevronUp : icons.chevronDown}</span>
@@ -250,8 +258,8 @@ function renderPenCard(pen: SavedPen): string {
           <button class="secondary-button" data-action="save-meta" type="button" title="Save folder and tags">${icons.check} Organize</button>
           <button class="secondary-button" data-action="copy" type="button" title="Copy standalone HTML">${icons.copy} Copy</button>
           <button class="secondary-button" data-action="download" type="button" title="Download standalone HTML">${icons.download} HTML</button>
-          ${pen.lastDownloadId ? `<button class="icon-button" data-action="show" type="button" title="Show downloaded file" aria-label="Show downloaded file">${icons.folder}</button>` : ""}
           <button class="icon-button danger" data-action="remove" type="button" title="Remove from library" aria-label="Remove from library">${icons.trash}</button>
+          <button class="secondary-button find-local-button" data-action="find-local" type="button" title="Find existing HTML file in local File Explorer">${icons.folder} Find local</button>
         </div>
       </div>
     </article>
@@ -265,7 +273,9 @@ function bindEvents(): void {
   document.querySelector<HTMLButtonElement>("#save-current")?.addEventListener("click", () => void saveCurrentPen());
   document.querySelector<HTMLButtonElement>("#save-tabs")?.addEventListener("click", () => void saveOpenTabs());
   document.querySelector<HTMLButtonElement>("#save-tabs-settings")?.addEventListener("click", () => void saveOpenTabs());
+  document.querySelector<HTMLButtonElement>("#find-latest-file")?.addEventListener("click", () => void findLatestFileLocation());
   document.querySelector<HTMLButtonElement>("#open-library-folder")?.addEventListener("click", () => openLibraryFolder());
+  document.querySelector<HTMLButtonElement>("#import-folder-quick")?.addEventListener("click", () => document.querySelector<HTMLInputElement>("#import-folder-input")?.click());
   document.querySelector<HTMLButtonElement>("#save-folder")?.addEventListener("click", () => void persistFolder());
   document.querySelector<HTMLButtonElement>("#export-library")?.addEventListener("click", () => void exportLibraryZip());
   document.querySelector<HTMLButtonElement>("#repair-library")?.addEventListener("click", () => void repairLibrary());
@@ -574,8 +584,8 @@ async function handleCardClick(event: MouseEvent): Promise<void> {
     setStatus(`Downloaded ${pen.filename}.`, "success");
   }
 
-  if (action === "show" && pen.lastDownloadId) {
-    getChrome()?.downloads?.show(pen.lastDownloadId);
+  if (action === "find-local") {
+    await findLocalFileForPen(pen);
   }
 
   if (action === "remove") {
@@ -641,6 +651,104 @@ function openLibraryFolder(): void {
 
   downloads.showDefaultFolder();
   setStatus(`Opened Chrome downloads. Your library folder is ${settings.downloadFolder}.`, "info", false);
+}
+
+async function findLatestFileLocation(): Promise<void> {
+  const downloads = getChrome()?.downloads;
+  if (!downloads?.show || !downloads.search) {
+    setStatus("Load this folder as a Chrome extension to find files in File Explorer.", "error", false);
+    return;
+  }
+
+  const latestPens = [...library].sort((a, b) => (Date.parse(b.savedAt) || 0) - (Date.parse(a.savedAt) || 0));
+  for (const pen of latestPens) {
+    const found = await findLocalDownloadItem(pen);
+    if (found) {
+      await showDownloadedFile(pen, found.id);
+      return;
+    }
+  }
+
+  setStatus(`No matching HTML files were found in Downloads/${sanitizeFolder(settings.downloadFolder) || "CodePen Library"}.`, "error", false);
+}
+
+async function findLocalFileForPen(pen: SavedPen): Promise<void> {
+  const downloads = getChrome()?.downloads;
+  if (!downloads?.show || !downloads.search) {
+    setStatus("Load this folder as a Chrome extension to find files in File Explorer.", "error", false);
+    return;
+  }
+
+  const found = await findLocalDownloadItem(pen);
+  if (found) {
+    await showDownloadedFile(pen, found.id);
+    return;
+  }
+
+  if (pen.lastDownloadId) {
+    await showDownloadedFile(pen, pen.lastDownloadId);
+    return;
+  }
+
+  setStatus(`Could not find ${pen.filename} in Downloads/${sanitizeFolder(settings.downloadFolder) || "CodePen Library"}.`, "error", false);
+}
+
+async function showDownloadedFile(pen: SavedPen, downloadId: number): Promise<void> {
+  const downloads = getChrome()?.downloads;
+  if (!downloads?.show) {
+    setStatus("Load this folder as a Chrome extension to find files in File Explorer.", "error", false);
+    return;
+  }
+
+  const shown = downloads.show(downloadId);
+  if (shown === false) {
+    setStatus(`Could not find ${pen.filename}. Download it again, then try Find.`, "error", false);
+    return;
+  }
+
+  if (pen.lastDownloadId !== downloadId) {
+    const updated = { ...pen, lastDownloadId: downloadId };
+    library = await updatePen(updated);
+  }
+
+  setStatus(`Opened ${pen.filename} in File Explorer.`, "success", false);
+}
+
+async function findLocalDownloadItem(pen: SavedPen): Promise<ChromeDownloadItem | null> {
+  const downloads = getChrome()?.downloads;
+  const searchDownloads = downloads?.search;
+  if (!searchDownloads) {
+    return null;
+  }
+
+  const items = await new Promise<ChromeDownloadItem[]>((resolve) => {
+    searchDownloads(
+      {
+        limit: 100,
+        orderBy: ["-startTime"],
+        query: [pen.filename],
+        state: "complete"
+      },
+      resolve
+    );
+  });
+
+  const expectedSuffix = expectedDownloadSuffix(pen);
+  const localFolder = normalizeDownloadPath(sanitizeFolder(settings.downloadFolder) || "CodePen Library");
+  const normalizedFilename = normalizeDownloadPath(pen.filename);
+  const filenameStem = normalizedFilename.replace(/\.html?$/i, "");
+
+  const candidates = items
+    .filter((item) => item.id && item.filename && item.exists !== false)
+    .map((item) => ({ item, path: normalizeDownloadPath(item.filename || "") }))
+    .filter(({ path }) => path.includes(`/${localFolder}/`) && path.endsWith(".html"));
+
+  return (
+    candidates.find(({ path }) => path.endsWith(expectedSuffix))?.item ||
+    candidates.find(({ path }) => path.endsWith(`/${normalizedFilename}`))?.item ||
+    candidates.find(({ path }) => path.split("/").pop()?.startsWith(filenameStem))?.item ||
+    null
+  );
 }
 
 async function persistViewSettings(patch: Partial<LibrarySettings>): Promise<void> {
@@ -711,21 +819,59 @@ async function importLibraryZip(event: Event): Promise<void> {
 
 async function importHtmlFolder(event: Event): Promise<void> {
   const input = event.currentTarget as HTMLInputElement;
-  const files = Array.from(input.files || []).filter((file) => file.name.toLowerCase().endsWith(".html"));
+  const allHtmlFiles = Array.from(input.files || []).filter((file) => file.name.toLowerCase().endsWith(".html"));
+  const files = allHtmlFiles.filter((file) => !isDuplicateArchiveFile(file));
+  const skippedDuplicates = allHtmlFiles.length - files.length;
   input.value = "";
   if (!files.length) {
+    if (skippedDuplicates) {
+      setStatus(`Skipped ${skippedDuplicates} file${skippedDuplicates === 1 ? "" : "s"} from _duplicates.`, "info");
+    }
     return;
   }
 
-  const imported: SavedPen[] = [];
+  const candidates: HtmlImportCandidate[] = [];
   for (const file of files) {
     const html = await file.text();
-    imported.push(penFromHtmlFile(file, html));
+    const sourceKey = importedSourceKey(file, html);
+    candidates.push({
+      file,
+      html,
+      sourceKey,
+      quality: importedSourceQuality(html)
+    });
   }
+
+  const bestQualityBySource = new Map<string, number>();
+  for (const candidate of candidates) {
+    if (!candidate.sourceKey) {
+      continue;
+    }
+
+    bestQualityBySource.set(
+      candidate.sourceKey,
+      Math.max(bestQualityBySource.get(candidate.sourceKey) || 0, candidate.quality)
+    );
+  }
+
+  const importable = candidates.filter((candidate) => {
+    if (!candidate.sourceKey) {
+      return true;
+    }
+
+    return candidate.quality > 0 || (bestQualityBySource.get(candidate.sourceKey) || 0) <= 0;
+  });
+  const skippedEmptyPlaceholders = candidates.length - importable.length;
+  const imported = importable.map(({ file, html }) => penFromHtmlFile(file, html));
 
   library = await upsertPens(imported);
   await saveLibrary(library);
-  setStatus(`Imported ${imported.length} HTML file${imported.length === 1 ? "" : "s"} from folder.`, "success");
+  setStatus(
+    `Imported ${imported.length} HTML file${imported.length === 1 ? "" : "s"} from folder${
+      skippedDuplicates ? ` and skipped ${skippedDuplicates} duplicate archive file${skippedDuplicates === 1 ? "" : "s"}` : ""
+    }${skippedEmptyPlaceholders ? ` and skipped ${skippedEmptyPlaceholders} empty placeholder file${skippedEmptyPlaceholders === 1 ? "" : "s"}` : ""}.`,
+    "success"
+  );
 }
 
 async function loadBundledSeed(): Promise<SavedPen[]> {
@@ -748,7 +894,7 @@ function penFromHtmlFile(file: File, html: string): SavedPen {
   const importedSourceMode = document.querySelector<HTMLMetaElement>('meta[name="codepen:source-mode"]')?.content || "";
   const parsed = source ? parseCodePenSource(source) : null;
   const title = decodeText(document.querySelector("title")?.textContent || stripHtmlExtension(file.name));
-  const relativePath = (file as File & { webkitRelativePath?: string }).webkitRelativePath || file.name;
+  const relativePath = importedRelativePath(file);
   const folder = sanitizeFolder(relativePath.split("/").slice(1, -1).join("/"));
   const sourceMode: SavedPen["sourceMode"] =
     importedSourceMode === "uncombined"
@@ -778,11 +924,59 @@ function penFromHtmlFile(file: File, html: string): SavedPen {
   };
 }
 
-function normalizeImportedHtml(title: string, source: string, html: string): string {
+function isDuplicateArchiveFile(file: File): boolean {
+  return importedRelativePath(file)
+    .split("/")
+    .some((part) => part.toLowerCase() === "_duplicates");
+}
+
+function importedRelativePath(file: File): string {
+  return (file as File & { webkitRelativePath?: string }).webkitRelativePath || file.name;
+}
+
+type HtmlImportCandidate = {
+  file: File;
+  html: string;
+  quality: number;
+  sourceKey: string;
+};
+
+function importedSourceKey(file: File, html: string): string {
+  const document = new DOMParser().parseFromString(html, "text/html");
+  const source = document.querySelector<HTMLMetaElement>('meta[name="codepen:source"]')?.content.trim() || "";
+  if (source) {
+    const parsed = parseCodePenSource(source);
+    return parsed ? `${parsed.user}/${parsed.slug}`.toLowerCase() : source.toLowerCase();
+  }
+
+  return `local/${importedRelativePath(file).replace(/\s+\(\d+\)(?=\.html?$)/i, "").toLowerCase()}`;
+}
+
+function importedSourceQuality(html: string): number {
+  const lower = html.toLowerCase();
+  const snippetMarkers = [
+    ["codepen html box start", "html box was empty or could not be fetched"],
+    ["codepen css box start", "css box was empty or could not be fetched"],
+    ["codepen js box start", "js box was empty or could not be fetched"]
+  ] as const;
+
+  if (snippetMarkers.some(([marker]) => lower.includes(marker))) {
+    return snippetMarkers.filter(([marker, placeholder]) => lower.includes(marker) && !lower.includes(placeholder)).length;
+  }
+
   if (
-    !html.includes("Pen Not Found or Not Available as a Resource") &&
-    !html.includes("This local file could not be reconstructed")
+    lower.includes("fetch blocked notice") ||
+    lower.includes("pen not found or not available as a resource") ||
+    lower.includes("this local file could not be reconstructed")
   ) {
+    return 0;
+  }
+
+  return html.trim().length ? 1 : 0;
+}
+
+function normalizeImportedHtml(title: string, source: string, html: string): string {
+  if (!isUnavailableImportedHtml(html)) {
     return html;
   }
 
@@ -844,6 +1038,20 @@ function normalizeImportedHtml(title: string, source: string, html: string): str
   }
 </body>
 </html>`;
+}
+
+function isUnavailableImportedHtml(html: string): boolean {
+  const lower = html.toLowerCase();
+  return (
+    html.includes("Pen Not Found or Not Available as a Resource") ||
+    html.includes("This local file could not be reconstructed") ||
+    (
+      lower.includes("fetch blocked notice") &&
+      lower.includes("html box was empty or could not be fetched") &&
+      lower.includes("css box was empty or could not be fetched") &&
+      lower.includes("js box was empty or could not be fetched")
+    )
+  );
 }
 
 function livePreviewUrl(source: string): string {
@@ -1039,6 +1247,11 @@ function zipPathForPen(pen: SavedPen): string {
   return `${sanitizeFolder(pen.folder || "Unsorted")}/${pen.filename}`;
 }
 
+function expectedDownloadSuffix(pen: SavedPen): string {
+  const parts = [sanitizeFolder(settings.downloadFolder) || "CodePen Library", sanitizeFolder(pen.folder || ""), pen.filename].filter(Boolean);
+  return `/${normalizeDownloadPath(parts.join("/"))}`;
+}
+
 function parseTags(value: string): string[] {
   return Array.from(
     new Set(
@@ -1072,13 +1285,29 @@ async function copyText(value: string): Promise<boolean> {
   }
 }
 
+type ChromeDownloadItem = {
+  exists?: boolean;
+  filename?: string;
+  id: number;
+  startTime?: string;
+  state?: "complete" | "in_progress" | "interrupted";
+};
+
+type ChromeDownloadSearchQuery = {
+  limit?: number;
+  orderBy?: string[];
+  query?: string[];
+  state?: "complete" | "in_progress" | "interrupted";
+};
+
 type ChromeSidePanelApi = {
   downloads?: {
     download(
       options: { conflictAction?: "uniquify" | "overwrite" | "prompt"; filename: string; saveAs?: boolean; url: string },
       callback?: (downloadId?: number) => void
     ): void;
-    show(downloadId: number): void;
+    search?(query: ChromeDownloadSearchQuery, callback: (items: ChromeDownloadItem[]) => void): void;
+    show?(downloadId: number): boolean | void;
     showDefaultFolder?(): void;
   };
   runtime?: {
@@ -1112,6 +1341,10 @@ function sanitizeFolder(value: string): string {
     .map((part) => part.replace(/[<>:"|?*]+/g, "").trim())
     .filter(Boolean)
     .join("/");
+}
+
+function normalizeDownloadPath(value: string): string {
+  return value.replace(/\\/g, "/").replace(/\/+/g, "/").toLowerCase();
 }
 
 function clampGridColumns(value: number): number {

@@ -123,10 +123,10 @@
     </div>
 
     <dialog class="save-dialog" id="saveDialog">
-      <form method="dialog" id="saveForm">
+      <form id="saveForm">
         <header>
           <h2>Name this session</h2>
-          <button class="icon-button" value="cancel" type="submit" aria-label="Close">
+          <button class="icon-button" id="closeSaveDialogButton" type="button" aria-label="Close">
             <svg viewBox="0 0 24 24" aria-hidden="true">
               <path d="M6 6l12 12M18 6 6 18"></path>
             </svg>
@@ -138,8 +138,8 @@
         </label>
         <p>The default name is the same timestamp style used by autosaves. Manual saves are tagged and highlighted separately.</p>
         <footer>
-          <button class="secondary-button" value="cancel" type="submit">Cancel</button>
-          <button class="primary-button" id="confirmSaveButton" value="default" type="submit">Save manual</button>
+          <button class="secondary-button" id="cancelSaveButton" type="button">Cancel</button>
+          <button class="primary-button" id="confirmSaveButton" type="submit">Save manual</button>
         </footer>
       </form>
     </dialog>

@@ -75,9 +75,12 @@ export async function enrichCodePen(meta: CodePenMeta, options: EnrichOptions = 
     if (aiHtml) {
       sourceMode = "ai-integrated";
       html = annotateStandaloneHtml(enrichedMeta, ensureDoctype(aiHtml));
+    } else if (raw.hasAnyCode) {
+      sourceMode = "raw-files";
+      html = composeStandaloneHtml(enrichedMeta, raw.html, raw.css, raw.js);
     } else {
-      sourceMode = raw.hasAnyCode ? "separated-source" : "page-html";
-      html = composeSeparatedSourceHtml(enrichedMeta, raw.html, raw.css, raw.js, !raw.hasAnyCode);
+      sourceMode = "page-html";
+      html = composeLivePreviewHtml(enrichedMeta);
     }
   }
 
@@ -91,7 +94,7 @@ export async function enrichCodePen(meta: CodePenMeta, options: EnrichOptions = 
     id: `${enrichedMeta.user}/${enrichedMeta.slug}`,
     savedAt,
     sourceMode,
-    tags: sourceMode === "separated-source" ? ["uncombined", "needs-refactor"] : []
+    tags: sourceMode === "ai-integrated" ? ["ai-integrated"] : []
   };
 }
 
@@ -285,6 +288,44 @@ ${escapeClosingScript(jsSource)}
   <footer style="position:fixed;bottom:8px;right:8px;font:12px/1.4 system-ui,sans-serif;background:rgba(0,0,0,0.65);color:#fff;padding:6px 10px;border-radius:6px;z-index:2147483647;pointer-events:auto;">
     Source: <a href="${safeUrl}" target="_blank" rel="noopener" style="color:#9bd1ff;">${safeUrl}</a>
   </footer>
+</body>
+</html>`;
+}
+
+function composeLivePreviewHtml(meta: CodePenMeta): string {
+  const safeTitle = escapeHtml(meta.title);
+  const safeUrl = escapeHtml(meta.canonicalUrl);
+  const previewUrl = escapeHtml(`https://codepen.io/${meta.user}/embed/${meta.slug}?default-tab=result&theme-id=light`);
+
+  return `<!doctype html>
+<!-- Saved from ${safeUrl} with CodePen Library Saver. Source fetch was blocked, so this file opens the live CodePen preview. -->
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>${safeTitle}</title>
+  <meta name="generator" content="CodePen Library Saver">
+  <meta name="codepen:source" content="${safeUrl}">
+  <meta name="codepen:source-mode" content="live-preview">
+  <style>
+    html,
+    body {
+      width: 100%;
+      height: 100%;
+      margin: 0;
+      background: #ffffff;
+    }
+
+    iframe {
+      display: block;
+      width: 100%;
+      height: 100%;
+      border: 0;
+    }
+  </style>
+</head>
+<body>
+  <iframe title="${safeTitle} live CodePen preview" src="${previewUrl}" allow="accelerometer; camera; encrypted-media; geolocation; gyroscope; microphone; midi; clipboard-read; clipboard-write; web-share"></iframe>
 </body>
 </html>`;
 }

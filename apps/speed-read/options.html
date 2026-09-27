@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Speed Read — Options</title>
+    <style>
+      :root { color-scheme: dark; }
+      body {
+        margin: 0 auto; max-width: 640px; padding: 32px 20px 60px;
+        background: #101018; color: #e8e8f0;
+        font: 14px/1.6 system-ui, -apple-system, "Segoe UI", sans-serif;
+      }
+      h1 { font-size: 20px; display: flex; align-items: center; gap: 10px; }
+      h2 { font-size: 15px; margin-top: 32px; }
+      .dot { width: 14px; height: 14px; border-radius: 4px; background: #6c5ce7; }
+      .card {
+        background: #16161f; border: 1px solid #2c2c3d; border-radius: 12px;
+        padding: 16px;
+      }
+      .status-grid { display: grid; grid-template-columns: auto 1fr; gap: 6px 16px; }
+      .status-grid b { color: #8b8ba3; font-weight: 500; }
+      .pill { font-weight: 600; }
+      .pill-available { color: #4ade80; }
+      .pill-downloadable, .pill-downloading { color: #fbbf24; }
+      .pill-unavailable, .pill-unsupported { color: #ff7675; }
+      button {
+        background: #6c5ce7; color: #fff; border: 0; border-radius: 8px;
+        padding: 8px 14px; font: inherit; font-weight: 600; cursor: pointer;
+      }
+      button:hover { background: #7d6ef0; }
+      button:disabled { background: #3a3a52; cursor: wait; }
+      button.ghost { background: #2c2c3d; }
+      .row { display: flex; gap: 10px; align-items: center; margin-top: 12px; flex-wrap: wrap; }
+      progress { width: 100%; margin-top: 10px; accent-color: #6c5ce7; }
+      textarea {
+        width: 100%; box-sizing: border-box; min-height: 120px;
+        background: #101018; color: #e8e8f0; border: 1px solid #2c2c3d;
+        border-radius: 8px; padding: 10px; font: inherit; resize: vertical;
+      }
+      .result { margin-top: 14px; }
+      .chip {
+        display: inline-block; font-size: 10px; font-weight: 700;
+        letter-spacing: .06em; text-transform: uppercase;
+        padding: 2px 7px; border-radius: 99px; margin-bottom: 4px;
+      }
+      .chip-eli5 { background: #103c2c; color: #4ade80; }
+      .chip-pitch { background: #3d2e10; color: #fbbf24; }
+      .chip-abstract { background: #2a2050; color: #a78bfa; }
+      .line { margin: 0 0 12px; }
+      .err { color: #ff7675; }
+      .muted { color: #8b8ba3; font-size: 13px; }
+      ul.muted { padding-left: 18px; }
+      kbd {
+        background: #2c2c3d; border-radius: 4px; padding: 1px 6px;
+        font-family: inherit; font-size: 12px;
+      }
+    </style>
+  </head>
+  <body>
+    <h1><span class="dot"></span>Speed Read</h1>
+    <p class="muted">
+      Everything runs on-device with Chrome's built-in Gemini Nano — no API keys, no
+      data leaves your machine. Trigger with <kbd>Alt+S</kbd> on any page, open the
+      side panel with <kbd>Alt+Shift+S</kbd>, or right-click selected text.
+    </p>
+
+    <h2>Engine status</h2>
+    <div class="card">
+      <div class="status-grid">
+        <b>Prompt API (Gemini Nano)</b> <span id="prompt-status" class="pill">checking…</span>
+        <b>Summarizer API (fallback)</b> <span id="summarizer-status" class="pill">checking…</span>
+      </div>
+      <div class="row">
+        <button id="download" hidden>Download model (~2–4 GB, one time)</button>
+        <button id="refresh" class="ghost">Refresh status</button>
+      </div>
+      <progress id="progress" max="1" value="0" hidden></progress>
+      <p id="engine-msg" class="muted"></p>
+      <ul class="muted">
+        <li>Requires Chrome 138+ on Windows, macOS 13+, or Linux</li>
+        <li>~22 GB free disk space on the drive holding your Chrome profile</li>
+        <li>GPU with more than 4 GB VRAM, or 16 GB RAM + 4 CPU cores</li>
+      </ul>
+    </div>
+
+    <h2>Test it</h2>
+    <div class="card">
+      <textarea id="test-input" placeholder="Paste any text here to test the three registers without leaving this page…"></textarea>
+      <div class="row">
+        <button id="test-run">Summarize</button>
+        <span id="test-msg" class="muted"></span>
+      </div>
+      <div id="test-result" class="result"></div>
+    </div>
+
+    <script type="module" src="options.js"></script>
+  </body>
+</html>

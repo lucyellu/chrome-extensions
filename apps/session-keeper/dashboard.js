@@ -34,6 +34,9 @@ const els = {
   saveDialog: document.querySelector("#saveDialog"),
   saveForm: document.querySelector("#saveForm"),
   sessionNameInput: document.querySelector("#sessionNameInput"),
+  closeSaveDialogButton: document.querySelector("#closeSaveDialogButton"),
+  cancelSaveButton: document.querySelector("#cancelSaveButton"),
+  confirmSaveButton: document.querySelector("#confirmSaveButton"),
   sessionTemplate: document.querySelector("#sessionTemplate"),
   windowTemplate: document.querySelector("#windowTemplate"),
   tabTemplate: document.querySelector("#tabTemplate"),
@@ -61,11 +64,18 @@ function bindEvents() {
   els.exportSelectedButton.addEventListener("click", () => exportSelectedSession());
   els.restoreSelectedButton.addEventListener("click", restoreSelectedSession);
 
+  els.closeSaveDialogButton?.addEventListener("click", () => els.saveDialog.close());
+  els.cancelSaveButton?.addEventListener("click", () => els.saveDialog.close());
+  els.saveDialog.addEventListener("click", (event) => {
+    if (event.target === els.saveDialog) {
+      els.saveDialog.close();
+    }
+  });
+
   els.saveForm.addEventListener("submit", (event) => {
-    if (event.submitter?.value === "cancel") return;
     event.preventDefault();
     els.saveDialog.close();
-    captureSession("manual", els.sessionNameInput.value);
+    captureSession("manual", els.sessionNameInput.value.trim());
   });
 }
 

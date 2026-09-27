@@ -3,6 +3,7 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="referrer" content="no-referrer">
     <title>Gallery Image Downloader</title>
     <link rel="stylesheet" href="sidepanel.css">
   </head>
@@ -51,6 +52,14 @@
             </svg>
             Download all
           </button>
+          <button class="primary-button quick-download" id="downloadZipButton" type="button" title="Download all visible as one ZIP" aria-label="Download all visible as one ZIP">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M4 6a2 2 0 0 1 2-2h5l2 2h5a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2z"></path>
+              <path d="M12 10v5"></path>
+              <path d="m10 13 2 2 2-2"></path>
+            </svg>
+            Download ZIP
+          </button>
         </section>
 
         <details class="settings" id="settingsPanel">
@@ -78,6 +87,14 @@
                 <input class="typeShortcut" type="checkbox" value="png" checked>
                 <span>PNG</span>
               </label>
+              <label class="chip-check">
+                <input class="typeShortcut" type="checkbox" value="webp" checked>
+                <span>WEBP</span>
+              </label>
+              <label class="chip-check">
+                <input class="typeShortcut" type="checkbox" value="other" checked>
+                <span>Other</span>
+              </label>
             </div>
 
             <label class="size-slider">
@@ -89,6 +106,7 @@
               <label>
                 <span>Sort</span>
                 <select id="sortMode">
+                  <option value="content">Photos first</option>
                   <option value="area">Largest</option>
                   <option value="position">Position</option>
                   <option value="width">Width</option>
@@ -103,7 +121,19 @@
               </label>
               <label class="check compact-check">
                 <input id="dedupeVariants" type="checkbox" checked>
-                <span>Largest of duplicates</span>
+                <span>Only largest of duplicates</span>
+              </label>
+              <label class="check compact-check">
+                <input id="hideChrome" type="checkbox" checked>
+                <span>Hide site graphics</span>
+              </label>
+              <label class="check compact-check">
+                <input id="fullRes" type="checkbox" checked>
+                <span>Full resolution</span>
+              </label>
+              <label class="check compact-check">
+                <input id="mainContentOnly" type="checkbox" checked>
+                <span>Skip related sections</span>
               </label>
             </div>
 
@@ -112,16 +142,36 @@
               <input id="columnsRange" type="range" min="1" max="8" step="1" value="4">
             </label>
 
+            <label class="search-field save-to-field">
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+              </svg>
+              <input id="downloadFolder" type="text" placeholder="Save to Downloads root"
+                     title="Subfolder inside your Downloads folder. Leave blank to save directly to Downloads.">
+            </label>
+
+            <div class="filter-grid">
+              <label class="check compact-check">
+                <input id="askWhereToSave" type="checkbox">
+                <span>Ask where to save</span>
+              </label>
+              <label class="check compact-check">
+                <input id="keepAnimated" type="checkbox" checked>
+                <span>Keep animation</span>
+              </label>
+            </div>
+
             <div class="settings-actions">
               <button class="secondary-button" id="reverseButton" type="button">Reverse sort</button>
               <button class="secondary-button" id="saveDefaultsButton" type="button">Save default</button>
               <label class="download-format">
                 <span>Download as</span>
                 <select id="downloadFormat">
-                  <option value="original">Original JPG/PNG</option>
-                  <option value="jpeg">JPG</option>
-                  <option value="png">PNG</option>
-                  <option value="webp">WEBP</option>
+                  <option value="auto">Auto JPG/PNG</option>
+                  <option value="jpeg">Always JPG</option>
+                  <option value="png">Always PNG</option>
+                  <option value="webp">Always WEBP</option>
+                  <option value="original">Original file</option>
                 </select>
               </label>
             </div>

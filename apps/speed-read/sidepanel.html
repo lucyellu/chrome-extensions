@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Speed Read</title>
+    <style>
+      :root { color-scheme: dark; }
+      body {
+        margin: 0; background: #101018; color: #e8e8f0;
+        font: 13px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif;
+      }
+      header {
+        position: sticky; top: 0; background: #16161f;
+        border-bottom: 1px solid #2c2c3d;
+        padding: 12px 14px; display: flex; align-items: center; gap: 10px;
+      }
+      .dot { width: 10px; height: 10px; border-radius: 3px; background: #6c5ce7; }
+      h1 { font-size: 14px; margin: 0; flex: 1; }
+      button {
+        background: #6c5ce7; color: #fff; border: 0; border-radius: 8px;
+        padding: 6px 12px; font: inherit; font-weight: 600; cursor: pointer;
+      }
+      button:hover { background: #7d6ef0; }
+      button:disabled { background: #3a3a52; cursor: wait; }
+      #error { color: #ff7675; padding: 10px 14px; display: none; }
+      #empty { color: #8b8ba3; text-align: center; padding: 40px 20px; }
+      #list { padding: 10px; }
+      details {
+        border: 1px solid #2c2c3d; border-radius: 12px;
+        margin-bottom: 10px; background: #16161f;
+      }
+      summary {
+        cursor: pointer; padding: 10px 12px; list-style: none;
+        display: flex; align-items: baseline; gap: 8px;
+      }
+      summary::-webkit-details-marker { display: none; }
+      .title {
+        flex: 1; min-width: 0; font-weight: 600;
+        white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+      }
+      .time { color: #8b8ba3; font-size: 11px; flex: none; }
+      .body { padding: 0 12px 10px; }
+      .row { margin-bottom: 10px; }
+      .chip {
+        display: inline-block; font-size: 10px; font-weight: 700;
+        letter-spacing: .06em; text-transform: uppercase;
+        padding: 2px 7px; border-radius: 99px; margin-bottom: 4px;
+      }
+      .chip-eli5 { background: #103c2c; color: #4ade80; }
+      .chip-pitch { background: #3d2e10; color: #fbbf24; }
+      .chip-abstract { background: #2a2050; color: #a78bfa; }
+      .line { margin: 0; }
+      .meta { font-size: 11px; color: #8b8ba3; }
+      .meta a { color: #8b8ba3; }
+    </style>
+  </head>
+  <body>
+    <header>
+      <div class="dot"></div>
+      <h1>Speed Read</h1>
+      <button id="run">Summarize current tab</button>
+    </header>
+    <div id="error"></div>
+    <div id="empty">Nothing summarized yet this session.<br />Press <b>Alt+S</b> on any page, or hit the button above.</div>
+    <div id="list"></div>
+    <script src="sidepanel.js"></script>
+  </body>
+</html>

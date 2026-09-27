@@ -213,12 +213,14 @@ svg {
 
 .quickbar {
   padding: 6px;
+  flex-direction: row;
+  gap: 6px;
 }
 
 .quick-download {
-  width: 100%;
   min-height: 34px;
-  flex: 0 0 auto !important;
+  flex: 1 1 0 !important;
+  min-width: 0;
 }
 
 .settings {
@@ -656,6 +658,31 @@ svg {
   height: 100%;
   display: block;
   object-fit: contain;
+}
+
+.broken-placeholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  color: var(--subtle);
+  background: var(--panel-strong);
+  font-size: 11px;
+  text-align: center;
+  padding: 10px;
+}
+
+.broken-placeholder svg {
+  width: 24px;
+  height: 24px;
+  stroke: var(--subtle);
+  stroke-width: 1.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  fill: none;
 }
 
 .card-body {

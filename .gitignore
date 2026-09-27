@@ -15,6 +15,9 @@ qa-*.png
 qa-*.jpg
 qa-*.webp
 
+# Chrome runtime generated files (e.g. declarativeNetRequest rulesets)
+_metadata/
+
 # Build/dependency output if future apps add toolchains
 node_modules/
 dist/

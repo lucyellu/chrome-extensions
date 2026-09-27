@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Higgsfield Queue Companion</title>
+    <link rel="stylesheet" href="sidepanel.css">
+  </head>
+  <body>
+    <div class="shell">
+      <header class="topbar">
+        <div class="brand" aria-label="Higgsfield Queue Companion">
+          <span class="brand-mark" aria-hidden="true">
+            <svg viewBox="0 0 24 24">
+              <path d="M5 6.5h14M5 12h14M5 17.5h9"></path>
+              <path d="M16.5 15.5 20 17.5l-3.5 2"></path>
+            </svg>
+          </span>
+          <span>
+            <strong>Higgsfield Queue</strong>
+            <small id="pageStatus">Build 0.4.0 · checking page</small>
+          </span>
+        </div>
+        <button class="icon-button" id="refreshButton" type="button" title="Refresh" aria-label="Refresh">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M20 12a8 8 0 1 1-2.35-5.65"></path>
+            <path d="M20 4v6h-6"></path>
+          </svg>
+        </button>
+      </header>
+
+      <section class="meter-strip" aria-label="Queue summary">
+        <div>
+          <strong id="queuedCount">0</strong>
+          <span>queued</span>
+        </div>
+        <div>
+          <strong id="runningCount">0</strong>
+          <span>active</span>
+        </div>
+        <div>
+          <strong id="doneCount">0</strong>
+          <span>done</span>
+        </div>
+      </section>
+
+      <main class="content">
+        <section class="panel status-panel" aria-label="Companion status">
+          <div class="status-copy">
+            <strong>Queue monitor</strong>
+            <span id="connectionHint">Use Higgsfield normally. Queued jobs and completed history appear here.</span>
+          </div>
+          <div class="action-grid compact-actions">
+            <button class="primary-button" id="diagnosticsButton" type="button">Check page hook</button>
+            <button class="secondary-button" id="openVideoButton" type="button">Open Higgsfield</button>
+            <button class="secondary-button" id="captureButton" type="button">Capture current GUI</button>
+            <button class="secondary-button" id="toggleQueueButton" type="button">Auto-run on</button>
+          </div>
+        </section>
+
+        <section class="queue-section" aria-label="Queued videos">
+          <div class="section-title queue-heading">
+            <strong>Queue</strong>
+            <div class="inline-actions">
+              <button class="secondary-button compact-button" id="resetErrorsButton" type="button">Retry errors</button>
+            </div>
+          </div>
+          <div class="empty-state" id="emptyState">
+            <strong>No queued videos</strong>
+            <span>Generate from Higgsfield while busy, or use Capture current GUI.</span>
+          </div>
+          <div class="queue-list" id="queueList"></div>
+        </section>
+
+        <section class="history-section" aria-label="Completed history">
+          <div class="section-title queue-heading">
+            <strong>History</strong>
+            <div class="inline-actions">
+              <span id="historySummary">No completed generations</span>
+              <button class="secondary-button compact-button" id="clearDoneButton" type="button">Clear</button>
+            </div>
+          </div>
+          <div class="empty-state" id="historyEmptyState">
+            <strong>No history yet</strong>
+            <span>Completed queued generations appear here.</span>
+          </div>
+          <div class="history-list" id="historyList"></div>
+        </section>
+
+        <section class="panel log-panel" aria-label="Activity">
+          <div class="section-title">
+            <strong>Activity</strong>
+            <button class="secondary-button compact-button" id="clearLogButton" type="button">Clear</button>
+          </div>
+          <div class="log-list" id="logList"></div>
+        </section>
+      </main>
+    </div>
+
+    <template id="queueItemTemplate">
+      <article class="queue-card">
+        <div class="queue-card-top">
+          <span class="status-pill"></span>
+          <strong class="item-title"></strong>
+          <div class="item-actions">
+            <button class="mini-button move-up" type="button" title="Move up" aria-label="Move up">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 15 6-6 6 6"></path></svg>
+            </button>
+            <button class="mini-button move-down" type="button" title="Move down" aria-label="Move down">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"></path></svg>
+            </button>
+          </div>
+        </div>
+        <p class="item-prompt"></p>
+        <div class="item-meta"></div>
+        <div class="item-estimate"></div>
+        <div class="card-actions">
+          <button class="secondary-button compact-button duplicate-item" type="button">Duplicate</button>
+          <button class="secondary-button compact-button reset-item" type="button">Reset</button>
+          <button class="secondary-button compact-button remove-item" type="button">Remove</button>
+        </div>
+        <div class="item-error"></div>
+      </article>
+    </template>
+
+    <script src="sidepanel.js"></script>
+  </body>
+</html>
