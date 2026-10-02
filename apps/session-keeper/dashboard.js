@@ -5,6 +5,7 @@ const state = {
   currentWindows: [],
   selectedId: "",
   search: "",
+  kindFilter: "all",
   settings: { autosaveMinutes: 15, maxAutosaves: 80 }
 };
 
@@ -16,6 +17,10 @@ const els = {
   searchInput: document.querySelector("#searchInput"),
   saveManualButton: document.querySelector("#saveManualButton"),
   autosaveNowButton: document.querySelector("#autosaveNowButton"),
+  filterChips: document.querySelectorAll(".filter-chip"),
+  countAll: document.querySelector("#countAll"),
+  countManual: document.querySelector("#countManual"),
+  countAuto: document.querySelector("#countAuto"),
   sessionList: document.querySelector("#sessionList"),
   currentTitle: document.querySelector("#currentTitle"),
   currentMeta: document.querySelector("#currentMeta"),
@@ -64,11 +69,27 @@ function bindEvents() {
   els.exportSelectedButton.addEventListener("click", () => exportSelectedSession());
   els.restoreSelectedButton.addEventListener("click", restoreSelectedSession);
 
+  els.filterChips.forEach((chip) => {
+    chip.addEventListener("click", () => {
+      setKindFilter(chip.dataset.filter || "all");
+    });
+  });
+
   els.closeSaveDialogButton?.addEventListener("click", () => els.saveDialog.close());
   els.cancelSaveButton?.addEventListener("click", () => els.saveDialog.close());
   els.saveDialog.addEventListener("click", (event) => {
     if (event.target === els.saveDialog) {
       els.saveDialog.close();
+    }
+  });
+
+  els.saveDialog.addEventListener("keydown", (event) => {
+    if (event.key === "Enter" && !event.isComposing) {
+      if (event.target === els.cancelSaveButton) {
+        return;
+      }
+      event.preventDefault();
+      els.saveForm.requestSubmit();
     }
   });
 
@@ -96,6 +117,10 @@ async function refreshData() {
 async function captureSession(kind, name = "") {
   const label = kind === "manual" ? "Manual session saved." : "Autosave captured.";
 
+  if (kind === "manual" && state.kindFilter === "auto") {
+    state.kindFilter = "manual";
+  }
+
   if (!extensionApi) {
     const session = createDemoSession(kind, name || formatTimestamp(new Date()));
     state.sessions = [session, ...state.sessions];
@@ -105,20 +130,23 @@ async function captureSession(kind, name = "") {
     return;
   }
 
-  const response = await sendMessage({ type: "CAPTURE_SESSION", kind, name });
-  state.sessions = response.sessions || [];
-  state.selectedId = response.session?.id || state.sessions[0]?.id || "";
-  render();
-  toast(label);
+  try {
+    const response = await sendMessage({ type: "CAPTURE_SESSION", kind, name });
+    state.sessions = response.sessions || [];
+    state.selectedId = response.session?.id || state.sessions[0]?.id || "";
+    render();
+    toast(label);
+  } catch (error) {
+    console.error("Failed to capture session:", error);
+    toast("Could not save session: " + (error?.message || "Unknown error"));
+  }
 }
 
 function openManualSaveDialog() {
   els.sessionNameInput.value = formatTimestamp(new Date());
   els.saveDialog.showModal();
-  requestAnimationFrame(() => {
-    els.sessionNameInput.focus();
-    els.sessionNameInput.select();
-  });
+  els.sessionNameInput.focus();
+  els.sessionNameInput.select();
 }
 
 function render() {
@@ -129,9 +157,40 @@ function render() {
   els.openNowTitle.textContent = `${currentTabCount} current tab${currentTabCount === 1 ? "" : "s"}`;
   els.openNowMeta.textContent = `${state.currentWindows.length} browser window${state.currentWindows.length === 1 ? "" : "s"}.`;
 
+  updateFilterCounts();
+  updateActiveFilterChip();
   renderSessions();
   renderSessionDetail();
   renderWindows(els.currentTabList, state.currentWindows);
+}
+
+function setKindFilter(filter) {
+  state.kindFilter = filter;
+  updateActiveFilterChip();
+  const sessions = filteredSessions();
+  if (sessions.length && !sessions.some((s) => s.id === state.selectedId)) {
+    state.selectedId = sessions[0].id;
+  }
+  render();
+}
+
+function updateActiveFilterChip() {
+  if (!els.filterChips) return;
+  els.filterChips.forEach((chip) => {
+    const isActive = chip.dataset.filter === state.kindFilter;
+    chip.classList.toggle("is-active", isActive);
+    chip.setAttribute("aria-selected", String(isActive));
+  });
+}
+
+function updateFilterCounts() {
+  const manualCount = state.sessions.filter((s) => s.kind === "manual").length;
+  const autoCount = state.sessions.filter((s) => s.kind === "auto").length;
+  const totalCount = state.sessions.length;
+
+  if (els.countAll) els.countAll.textContent = totalCount;
+  if (els.countManual) els.countManual.textContent = manualCount;
+  if (els.countAuto) els.countAuto.textContent = autoCount;
 }
 
 function renderSessions() {
@@ -139,7 +198,14 @@ function renderSessions() {
   const sessions = filteredSessions();
 
   if (!sessions.length) {
-    els.sessionList.appendChild(emptyNode("No sessions match the current search."));
+    const emptyMessage = state.search
+      ? "No sessions match the current search."
+      : state.kindFilter === "manual"
+      ? "No manual sessions saved yet."
+      : state.kindFilter === "auto"
+      ? "No autosaves recorded yet."
+      : "No saved sessions.";
+    els.sessionList.appendChild(emptyNode(emptyMessage));
     return;
   }
 
@@ -149,8 +215,12 @@ function renderSessions() {
 }
 
 function filteredSessions() {
-  if (!state.search) return state.sessions;
-  return state.sessions.filter((session) => {
+  let list = state.sessions;
+  if (state.kindFilter && state.kindFilter !== "all") {
+    list = list.filter((session) => session.kind === state.kindFilter);
+  }
+  if (!state.search) return list;
+  return list.filter((session) => {
     const text = [
       session.name,
       session.kind,
@@ -364,7 +434,11 @@ async function writeClipboard(text) {
 }
 
 function selectedSession() {
-  return state.sessions.find((session) => session.id === state.selectedId) || state.sessions[0] || null;
+  const visible = filteredSessions();
+  if (visible.length) {
+    return visible.find((session) => session.id === state.selectedId) || visible[0];
+  }
+  return null;
 }
 
 async function sendMessage(message) {

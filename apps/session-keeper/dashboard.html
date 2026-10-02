@@ -45,6 +45,18 @@
           </button>
         </div>
 
+        <nav class="filter-bar" role="tablist" aria-label="Filter sessions">
+          <button class="filter-chip is-active" id="filterAll" type="button" data-filter="all" role="tab" aria-selected="true">
+            All <span class="filter-count" id="countAll">0</span>
+          </button>
+          <button class="filter-chip" id="filterManual" type="button" data-filter="manual" role="tab" aria-selected="false">
+            Manual <span class="filter-count" id="countManual">0</span>
+          </button>
+          <button class="filter-chip" id="filterAuto" type="button" data-filter="auto" role="tab" aria-selected="false">
+            Autosaves <span class="filter-count" id="countAuto">0</span>
+          </button>
+        </nav>
+
         <section class="session-list" id="sessionList" aria-label="Saved sessions"></section>
       </aside>
 
@@ -134,7 +146,7 @@
         </header>
         <label class="field">
           <span>Session name</span>
-          <input id="sessionNameInput" type="text" autocomplete="off">
+          <input id="sessionNameInput" type="text" autocomplete="off" autofocus>
         </label>
         <p>The default name is the same timestamp style used by autosaves. Manual saves are tagged and highlighted separately.</p>
         <footer>

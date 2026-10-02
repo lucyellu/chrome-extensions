@@ -212,6 +212,73 @@ svg {
   flex: 0 0 auto;
 }
 
+.filter-bar {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background: #0d131d;
+  padding: 3px;
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+}
+
+.filter-chip {
+  flex: 1 1 0;
+  min-width: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  padding: 6px 4px;
+  font-size: 11px;
+  line-height: 14px;
+  font-weight: 750;
+  color: var(--muted);
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  white-space: nowrap;
+}
+
+.filter-chip:hover {
+  color: var(--text);
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.filter-chip.is-active {
+  color: var(--text);
+  background: var(--panel-strong);
+  border-color: var(--border-strong);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+.filter-chip[data-filter="manual"].is-active {
+  color: var(--manual);
+  border-color: rgba(245, 184, 75, 0.35);
+  background: var(--manual-soft);
+}
+
+.filter-chip .filter-count {
+  font-size: 10px;
+  line-height: 12px;
+  padding: 1px 5px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.07);
+  color: var(--muted);
+}
+
+.filter-chip.is-active .filter-count {
+  background: rgba(255, 255, 255, 0.14);
+  color: var(--text);
+}
+
+.filter-chip[data-filter="manual"].is-active .filter-count {
+  background: rgba(245, 184, 75, 0.22);
+  color: var(--manual);
+}
+
 .session-list {
   min-height: 0;
   overflow: auto;
